@@ -1,0 +1,9 @@
+button(type="button").chat-open-button.js-chat-open-button._hidden
+    include ../icons/chat.svg
+
+.chat.js-chat._hidden
+    ul.chat__list.js-chat__list
+    form(name="chat").chat__form.js-chat__form
+        textarea(name="message").chat__textarea
+        button(type="submit").chat__button
+            include ../icons/send.svg

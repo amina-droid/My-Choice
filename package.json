@@ -1,0 +1,31 @@
+{
+  "name": "my-choice-frontend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com-amina-droid:amina-droid/My-Choice.git",
+  "author": "Amina Mazurova <amina.rabadanova42@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --mode development --open",
+    "build": "webpack --mode production"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@neutrinojs/copy": "^9.1.0",
+    "@neutrinojs/eslint": "^9.1.0",
+    "@neutrinojs/web": "^9.1.0",
+    "eslint": "^6.8.0",
+    "neutrino": "^9.1.0",
+    "node-sass": "^4.13.1",
+    "pug": "^2.0.4",
+    "pug-loader": "^2.4.0",
+    "sass-loader": "^8.0.2",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "normalize.css": "^8.0.1",
+    "socket.io-client": "^2.3.0"
+  }
+}
