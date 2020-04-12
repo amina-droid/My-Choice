@@ -9,7 +9,11 @@ module.exports = {
           template: path.resolve(__dirname, './src/templates/index.pug')
       },
       style: {
-          loaders: ['sass-loader']
+          test: /\.(css|sass|scss)$/,
+          loaders: [{
+            loader: 'sass-loader',
+            useId: 'sass',
+          }]
       },
       babel: {
         plugins: ['@babel/plugin-proposal-class-properties']

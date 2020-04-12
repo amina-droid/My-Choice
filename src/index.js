@@ -1,26 +1,35 @@
 import io from 'socket.io-client';
+import SimpleScrollbar from 'simple-scrollbar';
+
+import 'simple-scrollbar/simple-scrollbar.css';
 import 'normalize.css';
-import './style.css';
+import './main.sass';
+
+SimpleScrollbar.initAll();
 
 const socket = io.connect('http://localhost:8080');
 
 let loginForm = document.querySelector('.js-form_login');
 let login = document.querySelector('.js-page_login');
 
-let chatIcon = document.querySelector('.js-chat-open-button');
+let chatIcon = document.querySelector('.js-chat__open-button');
 let chat = document.querySelector('.js-chat');
 let chatForm = document.querySelector('.js-chat__form');
 let chatList = document.querySelector('.js-chat__list');
+let chatClose = document.querySelector('.js-chat__cancel');
 
 let rooms = document.querySelector('.js-page_rooms');
 let newRoom = document.querySelector('.js-card_mini');
 
 let game = document.querySelector('.js-page_game');
+let gameClose = document.querySelector('.js-game__cancel')
 
 
 const HIDDEN = '_hidden'
+
 const user = {
     color: generateColor(),
+    roomName: '',
 };
 
 socket.on('chat:message', (e) => {
@@ -34,8 +43,15 @@ socket.on('chat:message', (e) => {
         chatMessage.innerHTML = `<span class="chat__author" style="color: ${e.color}">${e.name}:</span> <span class="chat__text">${e.message}</span>`;
         chatMessage.classList.add('chat__message_company', 'chat__message');
     }
-
+    SimpleScrollbar.initAll();
 })
+
+chatClose.addEventListener('click', () => {
+    chat.classList.add(HIDDEN);
+    chatIcon.classList.remove(HIDDEN)
+})
+
+
 let roomList = [];
 socket.on('rooms', (data) => {
     roomList.forEach(elem => {
@@ -52,9 +68,7 @@ socket.on('rooms', (data) => {
         roomCard.classList.add('card', 'card_mini', '_flex-center');
 
         roomCard.addEventListener('click', () => {
-            socket.emit('room:choice', { roomName: room.roomName })
-            rooms.classList.add(HIDDEN);
-            game.classList.remove(HIDDEN);
+            openRoom(room.roomName, 'room:choice');
 
         })
 
@@ -76,6 +90,13 @@ socket.on('rooms', (data) => {
     rooms.prepend(...roomList)
 
 })
+
+function openRoom(roomName, roomEvent){
+    socket.emit(roomEvent, { roomName })
+    rooms.classList.add(HIDDEN);
+    game.classList.remove(HIDDEN);
+    user.roomName = roomName;
+}
 
 function generateColor() {
     return '#' + Math.floor(Math.random() * 16777215).toString(16)
@@ -118,6 +139,42 @@ newRoom.addEventListener('click', () => {
 
 })
 
+gameClose.addEventListener('click', () => {
+    const modal = new Modal();
+    const content = closeGame(modal);
+    modal.open(content);
+})
+
+function closeGame(modal){
+    let title = document.createElement('h3');
+    title.textContent = 'Вы уверены?'
+    title.classList.add('card__title');
+
+    let buttonY = document.createElement('button');
+    buttonY.type = 'button';
+    buttonY.textContent = 'Да'
+    buttonY.classList.add('form__button', 'button');
+
+    buttonY.addEventListener('click', () => {
+        socket.emit('room:leave', { roomName: user.roomName })
+        user.roomName = '';
+        game.classList.add(HIDDEN);
+        rooms.classList.remove(HIDDEN);
+        modal.close();
+    })
+
+    let buttonN = document.createElement('button');
+    buttonN.type = 'button';
+    buttonN.textContent = 'Отмена'
+    buttonN.classList.add('form__button', 'button');
+
+    buttonN.addEventListener('click', () => {
+        modal.close();
+    })
+    return [title, buttonY, buttonN];
+
+}
+
 function formRoom(modal){
     let titleRoom = document.createElement('h3');
     titleRoom.textContent = 'Введите название комнаты'
@@ -133,14 +190,14 @@ function formRoom(modal){
 
     let buttonRoom = document.createElement('button');
     buttonRoom.type = 'submit';
-    buttonRoom.textContent = 'Добавить'
+    buttonRoom.textContent = 'Создать'
     buttonRoom.classList.add('form__button', 'button');
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const roomName = e.target.elements.roomName.value;
-        socket.emit('room:create', { roomName })
         modal.close();
+        openRoom(roomName, 'room:create');
     })
 
     form.append(inputRoom, buttonRoom);
@@ -151,7 +208,7 @@ class Modal {
 
     constructor(){
         this.modal = document.createElement('div');
-        this.modal.classList.add('modal');
+        this.modal.classList.add('modal', '_flex-center');
 
         this.modalBackground = document.createElement('div');
         this.modalBackground.classList.add('modal-background');

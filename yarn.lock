@@ -6417,6 +6417,11 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.3.tgz#a1410c2edd8f077b08b4e253c8eacfcaf057461c"
   integrity sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==
 
+simple-scrollbar@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/simple-scrollbar/-/simple-scrollbar-0.4.0.tgz#cd0b7a4f8dcf7c0bb8d4c83b0ac5b0acebf2579b"
+  integrity sha512-mK4cZtoa7UdmwxxMT44kXF3SdNs+Ml/IiFTML0wDJpDi3zVRevlkiJcrZJ7vVyTKUw6OmDyijdNJecHpnd5y3w==
+
 slash@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/slash/-/slash-1.0.0.tgz#c41f2f6c39fc16d1cd17ad4b5d896114ae470d55"
