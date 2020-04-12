@@ -6,7 +6,7 @@ import 'normalize.css';
 import './main.sass';
 
 SimpleScrollbar.initAll();
-const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'http://xn--72-9kcd8arods1i.xn--p1ai/api';
+const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'http://xn--72-9kcd8arods1i.xn--p1ai';
 const socket = io.connect(apiUrl);
 
 let loginForm = document.querySelector('.js-form_login');
