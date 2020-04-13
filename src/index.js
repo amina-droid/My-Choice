@@ -6,7 +6,7 @@ import 'normalize.css';
 import './main.sass';
 
 SimpleScrollbar.initAll();
-const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'http://xn--72-9kcd8arods1i.xn--p1ai';
+const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:7000' : 'http://xn--72-9kcd8arods1i.xn--p1ai';
 const socket = io.connect(apiUrl);
 
 let loginForm = document.querySelector('.js-form_login');
@@ -22,8 +22,11 @@ let rooms = document.querySelector('.js-page_rooms');
 let newRoom = document.querySelector('.js-card_mini');
 
 let game = document.querySelector('.js-page_game');
-let gameClose = document.querySelector('.js-game__cancel')
+let gameClose = document.querySelector('.js-game__cancel');
+let diceButton = document.querySelector('.js-dice__button');
+let diceContain = document.querySelector('.js-game__contain_dice');
 
+let dices = document.querySelectorAll('.js-dice')
 
 const HIDDEN = '_hidden'
 
@@ -32,22 +35,36 @@ const user = {
     roomName: '',
 };
 
+
+diceButton.addEventListener('click', () => {
+    console.log(dices)
+    let random = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+    dices.forEach(dice => {
+        dice.classList.add(HIDDEN)
+        if (String(random) === dice.dataset.dice ) {
+            dice.classList.remove(HIDDEN)
+        }
+    })
+    
+})
+
+
+
 socket.on('chat:message', (e) => {
     let chatMessage = document.createElement('li');
     chatList.append(chatMessage);
-    chatMessage.style.backgroundColor = generateRGBA(e.color)
     if (user.name === e.name){
         chatMessage.classList.add('chat__message_my', 'chat__message');
         chatMessage.innerHTML = `<span class="chat__text">${e.message}</span>`;
     } else {
-        chatMessage.innerHTML = `<span class="chat__author" style="color: ${e.color}">${e.name}:</span> <span class="chat__text">${e.message}</span>`;
-        chatMessage.classList.add('chat__message_company', 'chat__message');
+        chatMessage.innerHTML = `<span class="chat__author" style="color: ${e.color}">${e.name}</span> <span class="chat__text">${e.message}</span>`;
+        chatMessage.classList.add('chat__message_company', 'chat__message', '_flex-column');
     }
     SimpleScrollbar.initAll();
 })
 
 chatClose.addEventListener('click', () => {
-    chat.classList.add(HIDDEN);
+    chat.classList.add(HIDDEN)
     chatIcon.classList.remove(HIDDEN)
 })
 
@@ -147,13 +164,13 @@ gameClose.addEventListener('click', () => {
 
 function closeGame(modal){
     let title = document.createElement('h3');
-    title.textContent = 'Вы уверены?'
+    title.textContent = 'Выйти из комнаты?'
     title.classList.add('card__title');
 
     let buttonY = document.createElement('button');
     buttonY.type = 'button';
     buttonY.textContent = 'Да'
-    buttonY.classList.add('form__button', 'button');
+    buttonY.classList.add('form__button', 'button', '_two-button');
 
     buttonY.addEventListener('click', () => {
         socket.emit('room:leave', { roomName: user.roomName })
@@ -166,7 +183,7 @@ function closeGame(modal){
     let buttonN = document.createElement('button');
     buttonN.type = 'button';
     buttonN.textContent = 'Отмена'
-    buttonN.classList.add('form__button', 'button');
+    buttonN.classList.add('form__button', 'button', '_two-button');
 
     buttonN.addEventListener('click', () => {
         modal.close();
