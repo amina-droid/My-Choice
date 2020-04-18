@@ -37,10 +37,12 @@ const user = {
 
 
 diceButton.addEventListener('click', () => {
-    console.log(dices)
+
     let random = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+
     dices.forEach(dice => {
         dice.classList.add(HIDDEN)
+        
         if (String(random) === dice.dataset.dice ) {
             dice.classList.remove(HIDDEN)
         }
@@ -48,7 +50,9 @@ diceButton.addEventListener('click', () => {
     
 })
 
-
+socket.on('game:players', (e) => {
+    console.log(e)
+})
 
 socket.on('chat:message', (e) => {
     let chatMessage = document.createElement('li');
