@@ -60,7 +60,7 @@ playerOpenButton.addEventListener('click', () => {
     playerOpenButton.classList.add(HIDDEN);
 })
 
-diceButton.addEventListener('click', () => {
+function diceMove() {
 
     let random = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
     socket.emit('game:move', random);
@@ -74,7 +74,7 @@ diceButton.addEventListener('click', () => {
     })
     diceButton.setAttribute('disabled', 'true')
     
-})
+}
 
 function getPosition(user) {
     const odd = user.priority % 2;
@@ -142,7 +142,8 @@ socket.on('game:players', (users) => {
 
         if (user.name === obj.username && obj.currentMove && obj.dream) {
             diceButton.classList.remove(HIDDEN);
-            diceButton.removeAttribute('disabled')
+            diceButton.removeAttribute('disabled');
+            diceButton.addEventListener('click', diceMove, { once: true })
         }
 
         if (isGameStarted) {
@@ -157,6 +158,7 @@ socket.on('game:players', (users) => {
 
         if (user.name === obj.username && obj.card) {
             const modal = new Modal(false);
+            modal.modalWindow.classList.add('_flex-column', 'choice__modal')
             const content = cardModal(modal, obj.card);
             modal.open(content);
         }
@@ -166,7 +168,7 @@ socket.on('game:players', (users) => {
     
 })
 
-const FIELD_TYPE = {
+const FIELD_DICTIONARY = {
     1: 'Ситуация',
     2: 'Случай',
     3: 'Предложение',
@@ -177,9 +179,11 @@ const FIELD_TYPE = {
     8: 'Проблема',
 }
 
+const CHOICES_TYPE = [1, 3, 4]
+
 function cardModal(modal, card) {
     let title = document.createElement('h3');
-    title.textContent = `${FIELD_TYPE[card.type]}`;
+    title.textContent = `${FIELD_DICTIONARY[card.type]}`;
     title.classList.add('card__title');
 
     let description = document.createElement('span');
@@ -188,7 +192,7 @@ function cardModal(modal, card) {
 
     let choiceElems = [];
 
-    if (card.choices) {
+    if (CHOICES_TYPE.includes(card.type)) {
         choiceElems = card.choices.map((elem) => {
             let choice = document.createElement('button');
             choice.type = 'button';
@@ -205,6 +209,31 @@ function cardModal(modal, card) {
             })
             return choice;
         })
+    }
+    if (card.type === 5 || card.type === 2) {
+        let choice = document.createElement('button');
+        choice.type = 'button';
+        choice.textContent = `OK`;
+        choice.classList.add('button');
+
+        choice.addEventListener('click', () => {
+            
+            if (card.type === 2) {
+                socket.emit('game:choice', {
+                    type: card.type,
+                    id: card.id,
+                });
+            } else {
+                socket.emit('game:choice', {
+                    type: card.type,
+                });
+            }
+
+            modal.close();
+
+        })
+        choiceElems.push(choice);
+
     }
     return [title, description, ...choiceElems];
 }
