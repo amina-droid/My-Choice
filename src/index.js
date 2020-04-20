@@ -4,6 +4,7 @@ import SimpleScrollbar from 'simple-scrollbar';
 import 'simple-scrollbar/simple-scrollbar.css';
 import 'normalize.css';
 import './main.sass';
+import { AST_ObjectGetter } from 'terser';
 
 SimpleScrollbar.initAll();
 const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:7000' : 'http://xn--72-9kcd8arods1i.xn--p1ai';
@@ -22,23 +23,47 @@ let rooms = document.querySelector('.js-page_rooms');
 let newRoom = document.querySelector('.js-card_mini');
 
 let game = document.querySelector('.js-page_game');
+let gameHeader = document.querySelector('.js-game__header');
 let gameClose = document.querySelector('.js-game__cancel');
 let diceButton = document.querySelector('.js-dice__button');
 let diceContain = document.querySelector('.js-game__contain_dice');
 
-let dices = document.querySelectorAll('.js-dice')
+let playerOpenButton = document.querySelector('.js-players__open-button');
+let playerList = document.querySelector('.js-players__list');
+let playerListClose = document.querySelector('.js-players__cancel');
 
-const HIDDEN = '_hidden'
+let playersTable = document.querySelector('.js-players__tbody');
+
+let dices = document.querySelectorAll('.js-dice');
+
+let dreamPaths = document.querySelectorAll('.js-dream');
+
+let svgGame = document.querySelector('.js-svg_game')
+
+const HIDDEN = '_hidden';
+
+
 
 const user = {
     color: generateColor(),
     roomName: '',
+    priority: 0,
 };
 
+playerListClose.addEventListener('click', () => {
+    playerList.classList.add(HIDDEN);
+    playerOpenButton.classList.remove(HIDDEN);
+})
+
+playerOpenButton.addEventListener('click', () => {
+    playerList.classList.remove(HIDDEN);
+    playerOpenButton.classList.add(HIDDEN);
+})
 
 diceButton.addEventListener('click', () => {
 
     let random = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+    socket.emit('game:move', random);
 
     dices.forEach(dice => {
         dice.classList.add(HIDDEN)
@@ -47,12 +72,185 @@ diceButton.addEventListener('click', () => {
             dice.classList.remove(HIDDEN)
         }
     })
+    diceButton.setAttribute('disabled', 'true')
     
 })
 
-socket.on('game:players', (e) => {
-    console.log(e)
+function getPosition(user) {
+    const odd = user.priority % 2;
+
+    if (user.position.type === 'inner') {
+
+        return odd
+            ? {
+                x: (410 - (user.priority-1) * 15),
+                y: (460 + (user.priority-1) * 20),
+                transform: `rotate(${user.position.cell * 18}, 525, 352)`
+            }
+            : {
+                x: (395 - user.priority * 20),
+                y: (445 + (user.priority) * 15),
+                transform: `rotate(${user.position.cell * 18}, 525, 352)`
+            }
+        // return odd
+        //     ? `translate(${ 410 - (user.priority-1) * 15}, ${ 460 + (user.priority-1) * 20}) rotate(${user.position.cell * 18}, 525, 352)`
+        //     : `translate(${ 395 - user.priority * 20}, ${ 445 + (user.priority-1) * 15}) rotate(${user.position.cell * 18}, 525, 352)`
+    }
+  
+    if (user.position.type === 'outer') {
+        return `blabla()`;
+    }
+  
+    if (user.position.type === 'start') {
+        return odd
+            ? {
+                x: (290 - (user.priority-1) * 15),
+                y: 565,
+                transform: ''
+            }
+            : {
+                x: (290 - user.priority * 15),
+                y: 540,
+                transform: ''
+            }
+    }
+}
+
+
+let startGameButton;
+
+socket.on('game:players', (users) => {
+    playersTable.innerHTML = '';
+    users.forEach(obj => {
+        console.log(user.name, obj.username)
+        if (user.name === obj.username && obj.admin && !isGameStarted) {
+            createButtonStartGame();
+
+        }
+
+        if (obj.resources) {
+            let player = document.createElement('tr');
+            player.innerHTML = `
+                <td>${obj.username}</td>
+                <td>${obj.resources.white}</td>
+                <td>${obj.resources.dark}</td>
+                <td>${obj.resources.money}</td>
+                <td>${obj.resources.lives}</td>`
+    
+            playersTable.append(player);
+        }
+
+        if (user.name === obj.username && obj.currentMove && obj.dream) {
+            diceButton.classList.remove(HIDDEN);
+            diceButton.removeAttribute('disabled')
+        }
+
+        if (isGameStarted) {
+            const chip = getChip(obj.priority);
+
+            const chipPos = getPosition(obj);
+
+            Object.keys(chipPos).forEach(key => {
+                chip.setAttribute(key, chipPos[key]);
+            })
+        }
+
+        if (user.name === obj.username && obj.card) {
+            const modal = new Modal(false);
+            const content = cardModal(modal, obj.card);
+            modal.open(content);
+        }
+
+    })
+    console.log(users)
+    
 })
+
+const FIELD_TYPE = {
+    1: 'Ситуация',
+    2: 'Случай',
+    3: 'Предложение',
+    4: 'Реакция',
+    5: 'Возможность',
+    6: 'Тест',
+    7: 'Активность',
+    8: 'Проблема',
+}
+
+function cardModal(modal, card) {
+    let title = document.createElement('h3');
+    title.textContent = `${FIELD_TYPE[card.type]}`;
+    title.classList.add('card__title');
+
+    let description = document.createElement('span');
+    description.textContent = `${card.description}`;
+    description.classList.add('card__span');
+
+    if (card.choices) {
+        card.choices.forEach((elem) => {
+            let choice = document.createElement('button');
+            choice.type = 'button';
+            choice.textContent = `${elem.text}`;
+            choice.classList.add('button');
+
+            choice.addEventListener('click', () => {
+                socket.emit('game:choice', {
+                    type: card.type,
+                    id: card.id,
+                    choiceId: choice.id
+                });
+                modal.close();
+            })
+        })
+    }
+}
+
+socket.on('game:started', () => {
+    isGameStarted = true;
+
+    const modal = new Modal();
+    const content = choiceDreamModal(modal);
+    modal.open(content);
+
+    dreamPaths.forEach(path => {
+        path.classList.add('dream__path_active');
+        path.addEventListener('click', choiceDream)
+    })
+    
+})
+
+function choiceDream(e) {
+    socket.emit('game:dream', e.target.dataset.dream) 
+    dreamPaths.forEach(path => {
+        path.removeEventListener('click', choiceDream);
+        path.classList.remove('dream__path_active');
+    })
+}
+
+function choiceDreamModal(modal){
+    let title = document.createElement('h3');
+    title.textContent = 'Выберите мечту'
+    title.classList.add('card__title');
+
+    return [title];
+}
+
+let isGameStarted = false;
+function createButtonStartGame(){
+    if (startGameButton) return;
+    
+    startGameButton = document.createElement('button');
+    startGameButton.type = 'button';
+    startGameButton.classList.add('button', 'game__start');
+    startGameButton.textContent = 'Начать игру';
+
+    startGameButton.addEventListener('click', () => {
+        socket.emit('game:start');
+        startGameButton.remove();
+    })
+
+    gameHeader.prepend(startGameButton);
+}
 
 socket.on('chat:message', (e) => {
     let chatMessage = document.createElement('li');
@@ -225,9 +423,27 @@ function formRoom(modal){
     return [titleRoom, form];
 }
 
+
+const chips = {};
+function getChip(priority) {
+    console.log({ chips })
+    if (chips[priority]) {
+        return chips[priority];
+    }
+
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#chip_${priority}`);
+    use.setAttribute('x', '0');
+    use.setAttribute('y', '0');
+    svgGame.append(use);
+    chips[priority] = use;
+    
+    return chips[priority];
+}
+
 class Modal {
 
-    constructor(){
+    constructor(bgClose = true){
         this.modal = document.createElement('div');
         this.modal.classList.add('modal', '_flex-center');
 
@@ -239,7 +455,10 @@ class Modal {
 
         this.modal.append(this.modalBackground, this.modalWindow);
 
-        this.modalBackground.addEventListener('click', this.close, {once: true})
+        if (bgClose) {
+            this.modalBackground.addEventListener('click', this.close, {once: true})
+        }
+        
 
     }
     

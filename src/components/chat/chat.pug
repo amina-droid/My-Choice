@@ -1,10 +1,10 @@
 button(type="button").chat__open-button.js-chat__open-button._hidden
     include ../icons/chat.svg
 
-.chat._flex-column.js-chat._hidden
-    .chat__header
-        h3.chat__title Чат
-        button(type="button").chat__cancel.js-chat__cancel
+.chat._flex-column.popover.js-chat._hidden
+    .popover__header
+        h3.popover__title Чат
+        button(type="button").popover__cancel.js-chat__cancel
             include ../icons/cancel.svg
     .chat__body(ss-container="true")
         ul.chat__list._flex-column.js-chat__list

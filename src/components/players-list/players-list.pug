@@ -1,0 +1,17 @@
+button(type="button").players__open-button.button.js-players__open-button Таблица игроков
+.players__list.popover.js-players__list._hidden
+    .popover__header
+        h3.popover__title Таблица игроков
+        button(type="button").popover__cancel.js-players__cancel
+            include ../icons/cancel.svg
+    
+    .popover__body
+        table.players__table
+            thead 
+                tr
+                    th Имя
+                    th СК (Б)
+                    th СК (Ч)
+                    th ₽
+                    th Ж
+            tbody.js-players__tbody

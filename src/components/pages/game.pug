@@ -1,16 +1,18 @@
 .page.page_game.js-page_game._flex-center._flex-column._hidden
-
-    .game__contain_dice._flex-center.js-game__contain_dice
-        button(type="button").button.dice__button.js-dice__button Кинуть кубики
-        include ./../icons/dice1.svg
-        include ./../icons/dice2.svg
-        include ./../icons/dice3.svg
-        include ./../icons/dice4.svg
-        include ./../icons/dice5.svg
-        include ./../icons/dice6.svg
-
-    button(type="button").game__cancel.js-game__cancel
-        include ./../icons/cancel.svg
+    .game__header.js-game__header
+        .game__contain_players
+            include ./../players-list/players-list.pug
+        .game__contain_dice._flex-center.js-game__contain_dice
+            button(type="button").button.dice__button.js-dice__button._hidden Кинуть кубики
+            include ./../icons/dice1.svg
+            include ./../icons/dice2.svg
+            include ./../icons/dice3.svg
+            include ./../icons/dice4.svg
+            include ./../icons/dice5.svg
+            include ./../icons/dice6.svg
+    
+        button(type="button").game__cancel.js-game__cancel
+            include ./../icons/cancel.svg
 
     .game-field._flex-center
         include ./../game/game.svg

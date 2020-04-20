@@ -17,7 +17,7 @@ button
     min-height: 40px
 
     border: 1px solid #a0a0a0
-
+    background-color: white
 
 
 ._flex-column
@@ -96,12 +96,16 @@ button
         margin: 10px 0
         padding: 5px
 
-.chat
+.popover
     width: 300px
-    height: 400px
+
+    position: fixed
+    z-index: 100
 
     border-radius: 5px
     padding: 15px
+
+    background: white
 
     justify-content: space-between
 
@@ -117,6 +121,25 @@ button
     &__cancel
         height: 25px
         width: 25px
+
+
+.chat
+    height: 400px
+
+    &, &__open-button
+        bottom: 20px
+        right: 20px
+
+    &__open-button
+        border-radius: 50%
+
+        width: 70px
+        height: 70px
+
+        position: fixed
+        z-index: 1
+
+        background: white
 
     &__form
         display: flex
@@ -170,26 +193,6 @@ button
         &_company
             align-self: flex-start
 
-    &__open-button
-        border-radius: 50%
-
-        width: 70px
-        height: 70px
-
-
-.chat, .chat__open-button
-    background: white
-
-    position: fixed
-    bottom: 20px
-    right: 20px
-    z-index: 1
-
-.chat__open-button
-    border-radius: 50%
-
-    width: 70px
-    height: 70px
 
 .svg
     &_plus
@@ -237,15 +240,60 @@ button
 
         align-self: flex-end
         margin: 0 20px
-
+    &__contain
+        &_dice
+            margin: auto
     &__dice
         &-result
             margin: 10px
 
+    &__header
+        min-height: 40px
+        width: 100%
+
+        margin-bottom: 20px
+        
+        display: flex
+
+
+
 .dice
     height: 40px
+  
+.players
+    &__list
+        min-height: 100px
+        
+        background-color: white
+
     
 
 ._two-button
     margin: 10px 1%
     width: 48%
+
+.dream
+    &__path
+        &_active
+            position: relative
+            z-index: 99
+            stroke: #000!important
+
+            cursor: pointer
+
+            stroke-dasharray: 100
+            animation: dash 5s ease infinite
+
+
+
+
+@keyframes dash 
+    0% 
+        stroke-dashoffset: 100
+    50%
+        stroke-dashoffset: 1000
+    100%
+        stroke-dashoffset: 100% 
+  
+
+            
