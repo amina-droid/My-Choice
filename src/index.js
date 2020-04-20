@@ -186,8 +186,10 @@ function cardModal(modal, card) {
     description.textContent = `${card.description}`;
     description.classList.add('card__span');
 
+    let choiceElems = [];
+
     if (card.choices) {
-        card.choices.forEach((elem) => {
+        choiceElems = card.choices.map((elem) => {
             let choice = document.createElement('button');
             choice.type = 'button';
             choice.textContent = `${elem.text}`;
@@ -201,8 +203,10 @@ function cardModal(modal, card) {
                 });
                 modal.close();
             })
+            return choice;
         })
     }
+    return [title, description, ...choiceElems];
 }
 
 socket.on('game:started', () => {
