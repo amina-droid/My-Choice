@@ -75,6 +75,21 @@ function diceMove() {
     diceButton.setAttribute('disabled', 'true')
     
 }
+const LEFT_OUTER = [
+    0, 1, 2, 3, 4, 5, 6, 7, 8
+]
+
+const TOP_OUTER = [
+    9, 10, 11, 12, 13, 14
+]
+
+const RIGHT_OUTER = [
+    15, 16, 17, 18, 19, 20, 21, 22, 23
+]
+
+const BOTTOM_OUTER = [
+    24, 25, 26, 27, 28, 29
+]
 
 function getPosition(user) {
     const odd = user.priority % 2;
@@ -92,13 +107,61 @@ function getPosition(user) {
                 y: (445 + (user.priority) * 15),
                 transform: `rotate(${user.position.cell * 18}, 525, 352)`
             }
-        // return odd
-        //     ? `translate(${ 410 - (user.priority-1) * 15}, ${ 460 + (user.priority-1) * 20}) rotate(${user.position.cell * 18}, 525, 352)`
-        //     : `translate(${ 395 - user.priority * 20}, ${ 445 + (user.priority-1) * 15}) rotate(${user.position.cell * 18}, 525, 352)`
     }
   
     if (user.position.type === 'outer') {
-        return `blabla()`;
+        if (LEFT_OUTER.includes(user.position.cell)){
+            return odd
+            ? {
+                x: (100 - (user.priority - 1) * 15),
+                y: 675 - (user.position.cell * 78),
+                transform: ''
+            }
+            : {
+                x: (100 - (user.priority) * 15),
+                y: 630 - (user.position.cell * 78),
+                transform: ''
+            }
+        }
+        if (TOP_OUTER.includes(user.position.cell)){
+            return odd
+            ? {
+                x: 237 + ((user.position.cell - 9) * 131),
+                y: (55 - (user.priority - 1) * 15),
+                transform: ''
+            }
+            : {
+                x: 237 + ((user.position.cell - 9) * 131),
+                y: (10 - (user.priority) * 15),
+                transform: ''
+            }
+        }
+        if (RIGHT_OUTER.includes(user.position.cell)){
+            return odd
+            ? {
+                x: (1017 - (user.priority - 1) * 15),
+                y: 55 + ((user.position.cell - 15) * 78),
+                transform: ''
+            }
+            : {
+                x: (1017 - (user.priority) * 15),
+                y: 10 + ((user.position.cell - 15) * 78),
+                transform: ''
+            }
+        }
+        if (BOTTOM_OUTER.includes(user.position.cell)){
+            return odd
+            ? {
+                x: 886 - ((user.position.cell - 24) * 131),
+                y: (675 - (user.priority - 1) * 15),
+                transform: ''
+            }
+            : {
+                x: 886 - ((user.position.cell - 24) * 131),
+                y: (630 - (user.priority) * 15),
+                transform: ''
+            }
+        }
     }
   
     if (user.position.type === 'start') {
@@ -159,7 +222,7 @@ socket.on('game:players', (users) => {
         if (user.name === obj.username && obj.card) {
             const modal = new Modal(false);
             modal.modalWindow.classList.add('_flex-column', 'choice__modal')
-            const content = cardModal(modal, obj.card);
+            const content = cardModal(modal, obj.card, obj.resources);
             modal.open(content);
         }
 
@@ -167,6 +230,7 @@ socket.on('game:players', (users) => {
     console.log(users)
     
 })
+
 
 const FIELD_DICTIONARY = {
     1: 'Ситуация',
@@ -181,7 +245,7 @@ const FIELD_DICTIONARY = {
 
 const CHOICES_TYPE = [1, 3, 4]
 
-function cardModal(modal, card) {
+function cardModal(modal, card, resources) {
     let title = document.createElement('h3');
     title.textContent = `${FIELD_DICTIONARY[card.type]}`;
     title.classList.add('card__title');
@@ -203,14 +267,14 @@ function cardModal(modal, card) {
                 socket.emit('game:choice', {
                     type: card.type,
                     id: card.id,
-                    choiceId: choice.id
+                    choiceId: elem.id
                 });
                 modal.close();
             })
             return choice;
         })
     }
-    if (card.type === 5 || card.type === 2) {
+    if (card.type === 2) {
         let choice = document.createElement('button');
         choice.type = 'button';
         choice.textContent = `OK`;
@@ -218,24 +282,175 @@ function cardModal(modal, card) {
 
         choice.addEventListener('click', () => {
             
-            if (card.type === 2) {
-                socket.emit('game:choice', {
-                    type: card.type,
-                    id: card.id,
-                });
-            } else {
-                socket.emit('game:choice', {
-                    type: card.type,
-                });
-            }
-
+            socket.emit('game:choice', {
+                type: card.type,
+                id: card.id,
+            });
+            
             modal.close();
 
         })
         choiceElems.push(choice);
 
     }
+    if (card.type === 5) {
+
+
+        let choice = document.createElement('button');
+        choice.type = 'button';
+        choice.textContent = `OK`;
+        choice.classList.add('button');
+
+        choice.addEventListener('click', () => {
+            modal.close();
+            const opportunityModal = new Modal();
+            const content = opportunityModalContent(opportunityModal, card, resources);
+            opportunityModal.open(content);
+        })
+        choiceElems.push(choice);
+
+    }
     return [title, description, ...choiceElems];
+}
+
+function opportunityModalContent(modal, card, resources) {
+    let title = document.createElement('h3');
+    title.classList.add('card__title');
+    let description = document.createElement('span');
+    description.classList.add('card__span');
+
+    let choice = document.createElement('button');
+    choice.type = 'button';
+    choice.textContent = `OK`;
+    choice.classList.add('button');
+
+    if ((resources.lives >= 10 && resources.white >= 10) || (resources.lives >= 15 && resources.money >= 100)){
+        title.textContent = `${FIELD_DICTIONARY[card.type]}`;
+        description.textContent = 'Поздравляю! Вы переходите на внешний круг.';
+        choice.addEventListener('click', () => {
+            modal.close();
+        })
+
+        socket.emit('game:choice', {
+            type: card.type,
+            outer: true,
+        })
+
+    } else if (checkOuterMove(resources)){
+        title.textContent = `${FIELD_DICTIONARY[card.type]}`;
+        description.textContent = 'К сожалению, Вам не хватает ресурсов, бросьте кубик, чтобы испытать свои силы.';
+        choice.addEventListener('click', () => {
+            modal.close();
+        })
+        diceButton.removeAttribute('disabled')
+        diceButton.addEventListener('click',() => diceResourses(resources), { once: true });
+    } else {
+        description.textContent = 'В следующий раз повезет больше';
+        choice.addEventListener('click', () => {
+            modal.close();
+        })
+
+        socket.emit('game:choice', {
+            type: card.type,
+            outer: false,
+        })
+    }
+    return [title, description, choice];
+}
+
+function checkOuterMove(resources){
+    return (((resources.lives + 6) >= 10 && resources.white >= 10) || (resources.lives >= 10 && (resources.white + 6) >= 10) || ((resources.lives + 6) >= 15 && resources.money >= 100))
+}
+
+function blabla(resource, diceResult){
+
+    socket.emit('game:choice', {
+        type: 5,
+        outer: true,
+        resources: { [resource]: diceResult }
+    })
+}
+
+function youLacky(modal) {
+    let description = document.createElement('span');
+    description.textContent = 'Поздравляю! Вы смогли увеличить количество ресурсов и теперь можете перейти на внешний круг.';
+    description.classList.add('card__span');
+
+    let choice = document.createElement('button');
+    choice.type = 'button';
+    choice.textContent = `OK`;
+    choice.classList.add('button')
+
+    choice.addEventListener('click', () => {
+        modal.close();
+    })
+
+    return [description, choice];
+}
+
+function notThisTime(modal) {
+    let description = document.createElement('span');
+    description.textContent = 'В следующий раз повезет больше';
+    description.classList.add('card__span');
+
+    let choice = document.createElement('button');
+    choice.type = 'button';
+    choice.textContent = `OK`;
+    choice.classList.add('button');
+
+    choice.addEventListener('click', () => {
+        socket.emit('game:choice', {
+            type: 5,
+            outer: false,
+        })
+        modal.close();
+    })
+
+    return [description, choice];
+}
+
+function diceResourses(resources) {
+
+    let random = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+
+    dices.forEach(dice => {
+        dice.classList.add(HIDDEN)
+        
+        if (String(random) === dice.dataset.dice ) {
+            dice.classList.remove(HIDDEN)
+        }
+    })
+    diceButton.setAttribute('disabled', 'true')
+    if ((resources.lives + random) >= 10 && resources.white >= 10){
+        blabla('lives', random);
+
+        const modal = new Modal();
+        const content = youLacky(modal);
+        modal.open(content);
+
+        return
+    }
+    if (resources.lives >= 10 && (resources.white + random) >= 10){
+        blabla('white', random);
+
+        const modal = new Modal();
+        const content = youLacky(modal);
+        modal.open(content);
+
+        return
+    }
+    if ((resources.lives + random) >= 15 && resources.money >= 100) {
+        blabla('lives', random);
+
+        const modal = new Modal();
+        const content = youLacky(modal);
+        modal.open(content);
+
+        return
+    }
+    const modal = new Modal();
+    const content = notThisTime(modal);
+    modal.open(content);
 }
 
 socket.on('game:started', () => {
