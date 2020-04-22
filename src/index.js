@@ -195,10 +195,10 @@ socket.on('game:players', (users) => {
             let player = document.createElement('tr');
             player.innerHTML = `
                 <td>${obj.username}</td>
-                <td>${obj.resources.white}</td>
-                <td>${obj.resources.dark}</td>
-                <td>${obj.resources.money}</td>
-                <td>${obj.resources.lives}</td>`
+                <td>${getRecourseString(obj.resources.white)}</td>
+                <td>${getRecourseString(obj.resources.dark)}</td>
+                <td>${getRecourseString(obj.resources.money)}</td>
+                <td>${getRecourseString(obj.resources.lives)}</td>`
     
             playersTable.append(player);
         }
@@ -218,7 +218,7 @@ socket.on('game:players', (users) => {
                 chip.setAttribute(key, chipPos[key]);
             })
         }
-
+und
         if (user.name === obj.username && obj.card) {
             const modal = new Modal(false);
             modal.modalWindow.classList.add('_flex-column', 'choice__modal')
@@ -230,7 +230,9 @@ socket.on('game:players', (users) => {
     console.log(users)
     
 })
-
+function getRecourseString(res) {
+    return (res || res === 0) ? res : '-'
+  }
 
 const FIELD_DICTIONARY = {
     1: 'Ситуация',
