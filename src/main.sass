@@ -279,7 +279,25 @@ button
 
 .dice
     height: 40px
-  
+    &__button
+        margin-right: 10px
+        background-color: transparent
+        animation: blinking 2s infinite
+
+        &:disabled
+            animation: none
+            
+@keyframes blinking 
+  0% 
+    background-color: rgba(0, 255, 153, 1)
+
+  50% 
+    background-color: rgba(255, 255, 255, 1)
+
+  100% 
+    background-color: rgba(0, 255, 153, 1)
+
+
 .players
     &__list
         min-height: 100px

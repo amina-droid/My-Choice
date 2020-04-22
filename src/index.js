@@ -26,7 +26,6 @@ let game = document.querySelector('.js-page_game');
 let gameHeader = document.querySelector('.js-game__header');
 let gameClose = document.querySelector('.js-game__cancel');
 let diceButton = document.querySelector('.js-dice__button');
-let diceContain = document.querySelector('.js-game__contain_dice');
 
 let playerOpenButton = document.querySelector('.js-players__open-button');
 let playerList = document.querySelector('.js-players__list');
@@ -195,7 +194,7 @@ socket.on('game:players', (users) => {
 
         if (obj.resources) {
             let player = document.createElement('tr');
-            player.setAttribute('align', 'center')
+            player.setAttribute('align', 'center');
             player.innerHTML = `
                 <td class="td">${(obj.priority + 1) || '-'}</td>
                 <td class="td">${obj.username}</td>
@@ -205,8 +204,9 @@ socket.on('game:players', (users) => {
                 <td class="td">${getRecourseString(obj.resources.lives)}</td>`
     
             playersTable.append(player);
+
             if (obj.currentMove) {
-                player.classList.add('player__current')
+                player.classList.add('player__current');
                 console.log(player)
             }
             if (obj.gameover) {
