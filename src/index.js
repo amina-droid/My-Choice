@@ -515,6 +515,11 @@ txt.addEventListener('keydown', (e) => {
     }
     return true;
 })
+
+const newMessage = document.createElement('div');
+newMessage.classList.add('chat__new-message', HIDDEN);
+chatIcon.prepend(newMessage);
+
 socket.on('chat:message', (e) => {
     let chatMessage = document.createElement('li');
     chatList.append(chatMessage);
@@ -526,13 +531,16 @@ socket.on('chat:message', (e) => {
         chatMessage.innerHTML = `<span class="chat__author" style="color: ${e.color}">${e.name}</span> <span class="chat__text">${e.message}</span>`;
         chatMessage.classList.add('chat__message_company', 'chat__message', '_flex-column');
     }
+    if (chat.classList.contains(HIDDEN)) {
+        newMessage.classList.remove(HIDDEN);
+    }
     SimpleScrollbar.initAll();
     const chatBody = document.querySelector('.js-chat__body');
     const scrollContainer = chatBody.querySelector('.ss-content');
     scrollContainer.scrollTop = 9999;
-    //chatList.SimpleScrollBar.getScrollElement().scrollTop = 9999;
-    console.log(chatList)
 })
+
+
 
 chatClose.addEventListener('click', () => {
     chat.classList.add(HIDDEN)
@@ -610,6 +618,7 @@ loginForm.addEventListener('submit', (e) => {
 chatIcon.addEventListener('click', () => {
     chat.classList.remove(HIDDEN);
     chatIcon.classList.add(HIDDEN);
+    newMessage.classList.add(HIDDEN)
 })
 
 chatForm.addEventListener('submit', (e) => {
