@@ -258,7 +258,7 @@ const FIELD_DICTIONARY = {
     8: 'Проблема',
 }
 
-const CHOICES_TYPE = [1, 3, 4]
+const CHOICES_TYPE = [1, 3, 4, 6]
 
 function cardModal(modal, card, resources) {
     let title = document.createElement('h3');
