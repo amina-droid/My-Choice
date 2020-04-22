@@ -97,13 +97,13 @@ function getPosition(user) {
 
         return odd
             ? {
-                x: (410 - (user.priority-1) * 15),
-                y: (460 + (user.priority-1) * 20),
+                x: (410 - (user.priority-1)/2 * 13),
+                y: (460 + (user.priority-1)/2 * 18),
                 transform: `rotate(${user.position.cell * 18}, 525, 352)`
             }
             : {
-                x: (395 - user.priority * 20),
-                y: (445 + (user.priority) * 15),
+                x: (395 - user.priority/2 * 18),
+                y: (445 + user.priority/2 * 13),
                 transform: `rotate(${user.position.cell * 18}, 525, 352)`
             }
     }
@@ -125,13 +125,13 @@ function getPosition(user) {
         if (TOP_OUTER.includes(user.position.cell)){
             return odd
             ? {
-                x: 237 + ((user.position.cell - 9) * 131),
-                y: (55 - (user.priority - 1) * 15),
+                x: 237 - ((user.priority - 1) * 15) + ((user.position.cell - 9) * 131),
+                y: 55,
                 transform: ''
             }
             : {
-                x: 237 + ((user.position.cell - 9) * 131),
-                y: (10 - (user.priority) * 15),
+                x: 237 - (user.priority * 15) + ((user.position.cell - 9) * 131),
+                y: 10,
                 transform: ''
             }
         }
@@ -151,13 +151,13 @@ function getPosition(user) {
         if (BOTTOM_OUTER.includes(user.position.cell)){
             return odd
             ? {
-                x: 886 - ((user.position.cell - 24) * 131),
-                y: (675 - (user.priority - 1) * 15),
+                x: 886 - (user.priority - 1) * 15 - ((user.position.cell - 24) * 131),
+                y: 675,
                 transform: ''
             }
             : {
-                x: 886 - ((user.position.cell - 24) * 131),
-                y: (630 - (user.priority) * 15),
+                x: 886 - user.priority * 15 - ((user.position.cell - 24) * 131),
+                y: 630,
                 transform: ''
             }
         }
