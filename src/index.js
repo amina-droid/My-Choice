@@ -500,9 +500,25 @@ function createButtonStartGame(){
     gameHeader.prepend(startGameButton);
 }
 
+const txt = document.querySelector('.js-chat__textarea');
+txt.addEventListener('keydown', (e) => {
+    
+    if (!e.shiftKey && e.keyCode == 13) {
+        e.preventDefault();
+        const event = new Event('submit', {
+            'bubbles'    : true,
+            'cancelable' : true  
+        });
+        
+        chatForm.dispatchEvent(event);
+
+    }
+    return true;
+})
 socket.on('chat:message', (e) => {
     let chatMessage = document.createElement('li');
     chatList.append(chatMessage);
+
     if (user.name === e.name){
         chatMessage.classList.add('chat__message_my', 'chat__message');
         chatMessage.innerHTML = `<span class="chat__text">${e.message}</span>`;
@@ -511,6 +527,11 @@ socket.on('chat:message', (e) => {
         chatMessage.classList.add('chat__message_company', 'chat__message', '_flex-column');
     }
     SimpleScrollbar.initAll();
+    const chatBody = document.querySelector('.js-chat__body');
+    const scrollContainer = chatBody.querySelector('.ss-content');
+    scrollContainer.scrollTop = 9999;
+    //chatList.SimpleScrollBar.getScrollElement().scrollTop = 9999;
+    console.log(chatList)
 })
 
 chatClose.addEventListener('click', () => {

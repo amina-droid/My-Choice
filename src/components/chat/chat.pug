@@ -6,9 +6,9 @@ button(type="button").chat__open-button.js-chat__open-button._hidden
         h3.popover__title Чат
         button(type="button").popover__cancel.js-chat__cancel
             include ../icons/cancel.svg
-    .chat__body(ss-container="true")
+    .chat__body.js-chat__body(ss-container="true")
         ul.chat__list._flex-column.js-chat__list
     form(name="chat").chat__form.js-chat__form
-        textarea(name="message").chat__textarea
-        button(type="submit").chat__button
+        textarea(name="message").chat__textarea.js-chat__textarea
+        button(type="submit").chat__button.js-chat__button
             include ../icons/send.svg
