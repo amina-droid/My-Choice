@@ -19,6 +19,10 @@ button
     border: 1px solid #a0a0a0
     background-color: white
 
+.th, .td
+    padding: 0 10px
+
+
 
 ._flex-column
     display: flex
@@ -104,7 +108,7 @@ button
         padding: 5px
 
 .popover
-    width: 300px
+    min-width: 300px
 
     position: fixed
     z-index: 100
@@ -179,6 +183,7 @@ button
     &__body
         overflow-y: hidden
         height: 280px
+        max-width: 250px
 
     &__author
         font-size: 14px
@@ -281,7 +286,21 @@ button
         
         background-color: white
 
-    
+    &__tbody
+        & > .player__gameover
+            td
+                padding-top: 20px
+
+            & ~ .player__gameover
+                td
+                    padding-top: 0
+.player
+    &__current
+        color: #E27070
+
+    &__gameover
+        opacity: 0.3
+
 
 ._two-button
     margin: 10px 1%

@@ -184,7 +184,9 @@ let startGameButton;
 
 socket.on('game:players', (users) => {
     playersTable.innerHTML = '';
-    users.forEach(obj => {
+    users
+        .sort(a => a.gameover ? 1 : 0)
+        .forEach(obj => {
         console.log(user.name, obj.username)
         if (user.name === obj.username && obj.admin && !isGameStarted) {
             createButtonStartGame();
@@ -193,15 +195,26 @@ socket.on('game:players', (users) => {
 
         if (obj.resources) {
             let player = document.createElement('tr');
+            player.setAttribute('align', 'center')
             player.innerHTML = `
-                <td>${obj.username}</td>
-                <td>${getRecourseString(obj.resources.white)}</td>
-                <td>${getRecourseString(obj.resources.dark)}</td>
-                <td>${getRecourseString(obj.resources.money)}</td>
-                <td>${getRecourseString(obj.resources.lives)}</td>`
+                <td class="td">${(obj.priority + 1) || '-'}</td>
+                <td class="td">${obj.username}</td>
+                <td class="td">${getRecourseString(obj.resources.white)}</td>
+                <td class="td">${getRecourseString(obj.resources.dark)}</td>
+                <td class="td">${getRecourseString(obj.resources.money)}</td>
+                <td class="td">${getRecourseString(obj.resources.lives)}</td>`
     
             playersTable.append(player);
+            if (obj.currentMove) {
+                player.classList.add('player__current')
+                console.log(player)
+            }
+            if (obj.gameover) {
+                player.classList.add('player__gameover')
+            }
         }
+
+        
 
         if (user.name === obj.username && obj.currentMove && obj.dream) {
             diceButton.classList.remove(HIDDEN);
@@ -218,7 +231,7 @@ socket.on('game:players', (users) => {
                 chip.setAttribute(key, chipPos[key]);
             })
         }
-und
+
         if (user.name === obj.username && obj.card) {
             const modal = new Modal(false);
             modal.modalWindow.classList.add('_flex-column', 'choice__modal')
