@@ -358,8 +358,8 @@ class CardModal extends Modal{
             } else {
                 choice.setAttribute('disabled', 'true')
                 socket.on('game:user-choice', (id) => {
-                    console.log(id)
-                    if (id === elem.id) {
+                    const choiceId = Number(id);
+                    if (choiceId === elem.id) {
                         choice.classList.add('button_active');
                         setTimeout(() => this.close(), 3000);
                     }
