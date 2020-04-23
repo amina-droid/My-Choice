@@ -50,7 +50,7 @@ const user = {
 };
 class Modal {
 
-    constructor(bgClose = true){
+    constructor(bgClose = true) {
         this.modal = document.createElement('div');
         this.modal.classList.add('modal', '_flex-center');
 
@@ -63,13 +63,13 @@ class Modal {
         this.modal.append(this.modalBackground, this.modalWindow);
 
         if (bgClose) {
-            this.modalBackground.addEventListener('click', this.close, {once: true})
+            this.modalBackground.addEventListener('click', this.close, { once: true })
         }
-        
+
 
     }
-    
-    open(content){
+
+    open(content) {
         this.modalWindow.append(...content);
         document.body.appendChild(this.modal);
     }
@@ -96,13 +96,13 @@ function diceMove() {
 
     dices.forEach(dice => {
         dice.classList.add(HIDDEN)
-        
-        if (String(random) === dice.dataset.dice ) {
+
+        if (String(random) === dice.dataset.dice) {
             dice.classList.remove(HIDDEN)
         }
     })
     diceButton.setAttribute('disabled', 'true')
-    
+
 }
 const LEFT_OUTER = [
     0, 1, 2, 3, 4, 5, 6, 7, 8
@@ -127,76 +127,76 @@ function getPosition(user) {
 
         return odd
             ? {
-                x: (410 - (user.priority-1)/2 * 13),
-                y: (460 + (user.priority-1)/2 * 18),
+                x: (410 - (user.priority - 1) / 2 * 13),
+                y: (460 + (user.priority - 1) / 2 * 18),
                 transform: `rotate(${user.position.cell * 18}, 525, 352)`
             }
             : {
-                x: (395 - user.priority/2 * 18),
-                y: (445 + user.priority/2 * 13),
+                x: (395 - user.priority / 2 * 18),
+                y: (445 + user.priority / 2 * 13),
                 transform: `rotate(${user.position.cell * 18}, 525, 352)`
             }
     }
-  
+
     if (user.position.type === 'outer') {
-        if (LEFT_OUTER.includes(user.position.cell)){
+        if (LEFT_OUTER.includes(user.position.cell)) {
             return odd
-            ? {
-                x: (100 - (user.priority - 1) * 15),
-                y: 675 - (user.position.cell * 78),
-                transform: ''
-            }
-            : {
-                x: (100 - (user.priority) * 15),
-                y: 630 - (user.position.cell * 78),
-                transform: ''
-            }
+                ? {
+                    x: (100 - (user.priority - 1) * 15),
+                    y: 675 - (user.position.cell * 78),
+                    transform: ''
+                }
+                : {
+                    x: (100 - (user.priority) * 15),
+                    y: 630 - (user.position.cell * 78),
+                    transform: ''
+                }
         }
-        if (TOP_OUTER.includes(user.position.cell)){
+        if (TOP_OUTER.includes(user.position.cell)) {
             return odd
-            ? {
-                x: 237 - ((user.priority - 1) * 15) + ((user.position.cell - 9) * 131),
-                y: 55,
-                transform: ''
-            }
-            : {
-                x: 237 - (user.priority * 15) + ((user.position.cell - 9) * 131),
-                y: 10,
-                transform: ''
-            }
+                ? {
+                    x: 237 - ((user.priority - 1) * 15) + ((user.position.cell - 9) * 131),
+                    y: 55,
+                    transform: ''
+                }
+                : {
+                    x: 237 - (user.priority * 15) + ((user.position.cell - 9) * 131),
+                    y: 10,
+                    transform: ''
+                }
         }
-        if (RIGHT_OUTER.includes(user.position.cell)){
+        if (RIGHT_OUTER.includes(user.position.cell)) {
             return odd
-            ? {
-                x: (1017 - (user.priority - 1) * 15),
-                y: 55 + ((user.position.cell - 15) * 78),
-                transform: ''
-            }
-            : {
-                x: (1017 - (user.priority) * 15),
-                y: 10 + ((user.position.cell - 15) * 78),
-                transform: ''
-            }
+                ? {
+                    x: (1017 - (user.priority - 1) * 15),
+                    y: 55 + ((user.position.cell - 15) * 78),
+                    transform: ''
+                }
+                : {
+                    x: (1017 - (user.priority) * 15),
+                    y: 10 + ((user.position.cell - 15) * 78),
+                    transform: ''
+                }
         }
-        if (BOTTOM_OUTER.includes(user.position.cell)){
+        if (BOTTOM_OUTER.includes(user.position.cell)) {
             return odd
-            ? {
-                x: 886 - (user.priority - 1) * 15 - ((user.position.cell - 24) * 131),
-                y: 675,
-                transform: ''
-            }
-            : {
-                x: 886 - user.priority * 15 - ((user.position.cell - 24) * 131),
-                y: 630,
-                transform: ''
-            }
+                ? {
+                    x: 886 - (user.priority - 1) * 15 - ((user.position.cell - 24) * 131),
+                    y: 675,
+                    transform: ''
+                }
+                : {
+                    x: 886 - user.priority * 15 - ((user.position.cell - 24) * 131),
+                    y: 630,
+                    transform: ''
+                }
         }
     }
-  
+
     if (user.position.type === 'start') {
         return odd
             ? {
-                x: (290 - (user.priority-1) * 15),
+                x: (290 - (user.priority - 1) * 15),
                 y: 565,
                 transform: ''
             }
@@ -215,74 +215,74 @@ socket.on('game:players', (users) => {
     playersTable.innerHTML = '';
     users
         .sort((a, b) => {
-            if (a.gameover && b.gameover){
+            if (a.gameover && b.gameover) {
 
                 if (a.priority > b.priority) return 1;
                 else return -1;
 
             }
             if (a.gameover && !b.gameover) return 1
-            if (!a.gameover && b.gameover)  return -1;
+            if (!a.gameover && b.gameover) return -1;
             else return 0;
         })
         .forEach(obj => {
-        console.log(user.name, obj.username)
-        if (user.name === obj.username && obj.admin && !isGameStarted) {
-            createButtonStartGame();
+            console.log(user.name, obj.username)
+            if (user.name === obj.username && obj.admin && !isGameStarted) {
+                createButtonStartGame();
 
-        }
+            }
 
-        if (obj.resources) {
-            let player = document.createElement('tr');
-            player.setAttribute('align', 'center');
-            player.innerHTML = `
+            if (obj.resources) {
+                let player = document.createElement('tr');
+                player.setAttribute('align', 'center');
+                player.innerHTML = `
                 <td class="td">${(obj.priority + 1) || '-'}</td>
                 <td class="td">${obj.username}</td>
                 <td class="td">${getRecourseString(obj.resources.white)}</td>
                 <td class="td">${getRecourseString(obj.resources.dark)}</td>
                 <td class="td">${getRecourseString(obj.resources.money)}</td>
                 <td class="td">${getRecourseString(obj.resources.lives)}</td>`
-    
-            playersTable.append(player);
 
-            if (obj.currentMove) {
-                player.classList.add('player__current');
-                console.log(player)
+                playersTable.append(player);
+
+                if (obj.currentMove) {
+                    player.classList.add('player__current');
+                    console.log(player)
+                }
+                if (obj.gameover) {
+                    player.classList.add('player__gameover')
+                }
             }
-            if (obj.gameover) {
-                player.classList.add('player__gameover')
+
+
+
+            if (user.name === obj.username && obj.currentMove && obj.dream) {
+                diceButton.classList.remove(HIDDEN);
+                diceButton.removeAttribute('disabled');
+                diceButton.addEventListener('click', diceMove, { once: true })
             }
-        }
 
-        
+            if (isGameStarted) {
+                const chip = getChip(obj.priority);
 
-        if (user.name === obj.username && obj.currentMove && obj.dream) {
-            diceButton.classList.remove(HIDDEN);
-            diceButton.removeAttribute('disabled');
-            diceButton.addEventListener('click', diceMove, { once: true })
-        }
+                const chipPos = getPosition(obj);
 
-        if (isGameStarted) {
-            const chip = getChip(obj.priority);
+                Object.keys(chipPos).forEach(key => {
+                    chip.setAttribute(key, chipPos[key]);
+                })
+            }
 
-            const chipPos = getPosition(obj);
+            if (obj.card) {
+                new CardModal(obj.username, obj.card, obj.resources);
+            }
 
-            Object.keys(chipPos).forEach(key => {
-                chip.setAttribute(key, chipPos[key]);
-            })
-        }
-
-        if (obj.card) {
-            new CardModal(obj.username, obj.card, obj.resources);
-        }
-
-    })
+        })
     console.log(users)
-    
+
 })
 function getRecourseString(res) {
     return (res || res === 0) ? res : '-'
-  }
+}
 
 const FIELD_DICTIONARY = {
     1: 'Ситуация',
@@ -297,9 +297,9 @@ const FIELD_DICTIONARY = {
 
 const CHOICES_TYPE = [1, 3, 4, 6]
 
-class CardModal extends Modal{
+class CardModal extends Modal {
     constructor(userName, card, resources) {
-        super(false); 
+        super(false);
         this.modalWindow.classList.add('_flex-column', 'choice__modal');
         this.isCurrentUser = (userName === user.name);
 
@@ -312,7 +312,7 @@ class CardModal extends Modal{
     createTitleAndDescription(userName, card) {
         const title = document.createElement('h3');
         title.classList.add('card__title');
-    
+
         const description = document.createElement('span');
         description.textContent = `${card.description}`;
         description.classList.add('card__span');
@@ -325,7 +325,7 @@ class CardModal extends Modal{
         return [title, description]
     }
 
-    createChoices(card) {
+    createChoices(card, resources) {
         if (CHOICES_TYPE.includes(card.type)) {
             return this.createOptionsChoices(card);
         }
@@ -335,7 +335,7 @@ class CardModal extends Modal{
         }
 
         if (card.type === 5) {
-            return this.createOpportunityChoice(card);
+            return this.createOpportunityChoice(card, resources);
         }
     }
     createOptionsChoices(card) {
@@ -365,7 +365,7 @@ class CardModal extends Modal{
                     }
                 })
             }
-            
+
             return choice;
         })
     }
@@ -376,14 +376,14 @@ class CardModal extends Modal{
         choice.classList.add('button');
         if (this.isCurrentUser) {
             choice.addEventListener('click', () => {
-            
+
                 socket.emit('game:choice', {
                     type: card.type,
                     id: card.id,
                 });
-                
+
                 this.close();
-    
+
             })
         } else {
             choice.setAttribute('disabled', 'true');
@@ -418,7 +418,7 @@ class OpportunityModal extends Modal {
 
         this.description = document.createElement('span');
         this.description.classList.add('card__span');
-    
+
         this.choice = document.createElement('button');
         this.choice.type = 'button';
         this.choice.textContent = `OK`;
@@ -427,14 +427,16 @@ class OpportunityModal extends Modal {
             this.close();
         })
 
+
         this.outerAvailable(resources, card)
+        this.open([this.title, this.description, this.choice])
     }
 
     outerAvailable({ white, lives, money }, card) {
-        if ((lives >= 10 && white >= 10) || (lives >= 15 && money >= 100)){
+        if ((lives >= 10 && white >= 10) || (lives >= 15 && money >= 100)) {
             this.successfull(card);
-        } else if (this.checkOuterMove({ white, lives, money })){
-            this.rollDice(card);
+        } else if (this.checkOuterMove({ white, lives, money })) {
+            this.rollDice({ white, lives, money });
         } else {
             this.fail(card);
         }
@@ -451,9 +453,9 @@ class OpportunityModal extends Modal {
 
     rollDice({ white, lives, money }) {
         this.description.textContent = 'К сожалению, Вам не хватает ресурсов, бросьте кубик, чтобы испытать свои силы.';
- 
+
         diceButton.removeAttribute('disabled')
-        diceButton.addEventListener('click',() => diceResourses({ white, lives, money }), { once: true });
+        diceButton.addEventListener('click', () => diceResourses({ white, lives, money }), { once: true });
     }
 
     fail(card) {
@@ -466,18 +468,17 @@ class OpportunityModal extends Modal {
     }
 
     checkOuterMove({ white, lives, money }) {
-        return (((lives + 6) >= 10 && white >= 10) 
-                || (lives >= 10 && (white + 6) >= 10) 
-                || ((lives + 6) >= 15 && money >= 100))
+        return (((lives + 6) >= 10 && white >= 10)
+            || (lives >= 10 && (white + 6) >= 10)
+            || ((lives + 6) >= 15 && money >= 100))
     }
 }
 
-function blabla(resource, diceResult){
-
+function blabla(resourceType, diceResult) {
     socket.emit('game:choice', {
         type: 5,
         outer: true,
-        resources: { [resource]: diceResult }
+        resources: { [resourceType]: diceResult }
     })
 }
 
@@ -525,13 +526,13 @@ function diceResourses({ white, lives, money }) {
 
     dices.forEach(dice => {
         dice.classList.add(HIDDEN)
-        
-        if (String(random) === dice.dataset.dice ) {
+
+        if (String(random) === dice.dataset.dice) {
             dice.classList.remove(HIDDEN)
         }
     })
     diceButton.setAttribute('disabled', 'true')
-    if ((lives + random) >= 10 && white >= 10){
+    if ((lives + random) >= 10 && white >= 10) {
         blabla('lives', random);
 
         const modal = new Modal();
@@ -540,7 +541,7 @@ function diceResourses({ white, lives, money }) {
 
         return
     }
-    if (lives >= 10 && (white + random) >= 10){
+    if (lives >= 10 && (white + random) >= 10) {
         blabla('white', random);
 
         const modal = new Modal();
@@ -574,18 +575,18 @@ socket.on('game:started', () => {
         path.classList.add('dream__path_active');
         path.addEventListener('click', choiceDream)
     })
-    
+
 })
 
 function choiceDream(e) {
-    socket.emit('game:dream', e.target.dataset.dream) 
+    socket.emit('game:dream', e.target.dataset.dream)
     dreamPaths.forEach(path => {
         path.removeEventListener('click', choiceDream);
         path.classList.remove('dream__path_active');
     })
 }
 
-function choiceDreamModal(modal){
+function choiceDreamModal(modal) {
     let title = document.createElement('h3');
     title.textContent = 'Выберите мечту'
     title.classList.add('card__title');
@@ -594,9 +595,9 @@ function choiceDreamModal(modal){
 }
 
 let isGameStarted = false;
-function createButtonStartGame(){
+function createButtonStartGame() {
     if (startGameButton) return;
-    
+
     startGameButton = document.createElement('button');
     startGameButton.type = 'button';
     startGameButton.classList.add('button', 'game__start');
@@ -612,14 +613,14 @@ function createButtonStartGame(){
 
 const txt = document.querySelector('.js-chat__textarea');
 txt.addEventListener('keydown', (e) => {
-    
+
     if (!e.shiftKey && e.keyCode == 13) {
         e.preventDefault();
         const event = new Event('submit', {
-            'bubbles'    : true,
-            'cancelable' : true  
+            'bubbles': true,
+            'cancelable': true
         });
-        
+
         chatForm.dispatchEvent(event);
 
     }
@@ -634,7 +635,7 @@ socket.on('chat:message', (e) => {
     let chatMessage = document.createElement('li');
     chatList.append(chatMessage);
 
-    if (user.name === e.name){
+    if (user.name === e.name) {
         chatMessage.classList.add('chat__message_my', 'chat__message');
         chatMessage.innerHTML = `<span class="chat__text">${e.message}</span>`;
     } else {
@@ -687,8 +688,8 @@ socket.on('rooms', (data) => {
         countUser.textContent = `Подключено: ${room.userCount}`
 
         roomCard.prepend(nameRoomCard, countUser)
-        
-        
+
+
         roomList.push(roomCard);
 
         console.log(room)
@@ -697,7 +698,7 @@ socket.on('rooms', (data) => {
 
 })
 
-function openRoom(roomName, roomEvent){
+function openRoom(roomName, roomEvent) {
     socket.emit(roomEvent, { roomName })
     rooms.classList.add(HIDDEN);
     game.classList.remove(HIDDEN);
@@ -707,13 +708,13 @@ function openRoom(roomName, roomEvent){
 function generateColor() {
     return '#' + Math.floor(Math.random() * 16777215).toString(16)
 }
-function generateRGBA(color){
-    return `rgba(${toR(color)}, ${toG(color)}, ${toB(color)}, 0.3)` 
+function generateRGBA(color) {
+    return `rgba(${toR(color)}, ${toG(color)}, ${toB(color)}, 0.3)`
 }
-function toR(h) { return parseInt((cutHex(h)).substring(0,2),16) }
-function toG(h) { return parseInt((cutHex(h)).substring(2,4),16) }
-function toB(h) { return parseInt((cutHex(h)).substring(4,6),16) }
-function cutHex(h) { return (h.charAt(0)=="#") ? h.substring(1,7) : h}
+function toR(h) { return parseInt((cutHex(h)).substring(0, 2), 16) }
+function toG(h) { return parseInt((cutHex(h)).substring(2, 4), 16) }
+function toB(h) { return parseInt((cutHex(h)).substring(4, 6), 16) }
+function cutHex(h) { return (h.charAt(0) == "#") ? h.substring(1, 7) : h }
 
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -739,7 +740,7 @@ chatForm.addEventListener('submit', (e) => {
 })
 
 newRoom.addEventListener('click', () => {
-    
+
     const modal = new Modal();
     const content = formRoom(modal);
     modal.open(content);
@@ -752,7 +753,7 @@ gameClose.addEventListener('click', () => {
     modal.open(content);
 })
 
-function closeGame(modal){
+function closeGame(modal) {
     let title = document.createElement('h3');
     title.textContent = 'Выйти из комнаты?'
     title.classList.add('card__title');
@@ -782,7 +783,7 @@ function closeGame(modal){
 
 }
 
-function formRoom(modal){
+function formRoom(modal) {
     let titleRoom = document.createElement('h3');
     titleRoom.textContent = 'Введите название комнаты'
     titleRoom.classList.add('card__title');
@@ -825,7 +826,7 @@ function getChip(priority) {
     use.setAttribute('y', '0');
     svgGame.append(use);
     chips[priority] = use;
-    
+
     return chips[priority];
 }
 
