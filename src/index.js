@@ -361,7 +361,7 @@ class CardModal extends Modal{
                     console.log(id)
                     if (id === elem.id) {
                         choice.classList.add('button_active');
-                        setTimeout(() => this.close(), 2000);
+                        setTimeout(() => this.close(), 3000);
                     }
                 })
             }
@@ -374,29 +374,37 @@ class CardModal extends Modal{
         choice.type = 'button';
         choice.textContent = `OK`;
         choice.classList.add('button');
-
-        choice.addEventListener('click', () => {
+        if (this.isCurrentUser) {
+            choice.addEventListener('click', () => {
             
-            socket.emit('game:choice', {
-                type: card.type,
-                id: card.id,
-            });
-            
-            this.close();
-
-        })
+                socket.emit('game:choice', {
+                    type: card.type,
+                    id: card.id,
+                });
+                
+                this.close();
+    
+            })
+        } else {
+            choice.setAttribute('disabled', 'true');
+            setTimeout(() => this.close(), 3000);
+        }
         return [choice]
     }
-    createOpportunityChoice(card) {
+    createOpportunityChoice(card, resources) {
         const choice = document.createElement('button');
         choice.type = 'button';
         choice.textContent = `OK`;
         choice.classList.add('button');
-
-        choice.addEventListener('click', () => {
-            this.close();
-            new OpportunityModal(card, resources);
-        })
+        if (this.isCurrentUser) {
+            choice.addEventListener('click', () => {
+                this.close();
+                new OpportunityModal(card, resources);
+            })
+        } else {
+            choice.setAttribute('disabled', 'true');
+            setTimeout(() => this.close(), 3000);
+        }
         return [choice]
     }
 }
@@ -441,11 +449,11 @@ class OpportunityModal extends Modal {
         })
     }
 
-    rollDice(card) {
+    rollDice({ white, lives, money }) {
         this.description.textContent = 'К сожалению, Вам не хватает ресурсов, бросьте кубик, чтобы испытать свои силы.';
  
         diceButton.removeAttribute('disabled')
-        diceButton.addEventListener('click',() => diceResourses(resources), { once: true });
+        diceButton.addEventListener('click',() => diceResourses({ white, lives, money }), { once: true });
     }
 
     fail(card) {
@@ -511,7 +519,7 @@ function notThisTime(modal) {
     return [description, choice];
 }
 
-function diceResourses(resources) {
+function diceResourses({ white, lives, money }) {
 
     let random = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
 
@@ -523,7 +531,7 @@ function diceResourses(resources) {
         }
     })
     diceButton.setAttribute('disabled', 'true')
-    if ((resources.lives + random) >= 10 && resources.white >= 10){
+    if ((lives + random) >= 10 && white >= 10){
         blabla('lives', random);
 
         const modal = new Modal();
@@ -532,7 +540,7 @@ function diceResourses(resources) {
 
         return
     }
-    if (resources.lives >= 10 && (resources.white + random) >= 10){
+    if (lives >= 10 && (white + random) >= 10){
         blabla('white', random);
 
         const modal = new Modal();
@@ -541,7 +549,7 @@ function diceResourses(resources) {
 
         return
     }
-    if ((resources.lives + random) >= 15 && resources.money >= 100) {
+    if ((lives + random) >= 15 && money >= 100) {
         blabla('lives', random);
 
         const modal = new Modal();
