@@ -48,6 +48,36 @@ const user = {
     roomName: '',
     priority: 0,
 };
+class Modal {
+
+    constructor(bgClose = true){
+        this.modal = document.createElement('div');
+        this.modal.classList.add('modal', '_flex-center');
+
+        this.modalBackground = document.createElement('div');
+        this.modalBackground.classList.add('modal-background');
+
+        this.modalWindow = document.createElement('div');
+        this.modalWindow.classList.add('modal-window', 'card');
+
+        this.modal.append(this.modalBackground, this.modalWindow);
+
+        if (bgClose) {
+            this.modalBackground.addEventListener('click', this.close, {once: true})
+        }
+        
+
+    }
+    
+    open(content){
+        this.modalWindow.append(...content);
+        document.body.appendChild(this.modal);
+    }
+
+    close = () => {
+        this.modal.remove();
+    }
+}
 
 playerListClose.addEventListener('click', () => {
     playerList.classList.add(HIDDEN);
@@ -184,7 +214,17 @@ let startGameButton;
 socket.on('game:players', (users) => {
     playersTable.innerHTML = '';
     users
-        .sort(a => a.gameover ? 1 : 0)
+        .sort((a, b) => {
+            if (a.gameover && b.gameover){
+
+                if (a.priority > b.priority) return 1;
+                else return -1;
+
+            }
+            if (a.gameover && !b.gameover) return 1
+            if (!a.gameover && b.gameover)  return -1;
+            else return 0;
+        })
         .forEach(obj => {
         console.log(user.name, obj.username)
         if (user.name === obj.username && obj.admin && !isGameStarted) {
@@ -232,11 +272,8 @@ socket.on('game:players', (users) => {
             })
         }
 
-        if (user.name === obj.username && obj.card) {
-            const modal = new Modal(false);
-            modal.modalWindow.classList.add('_flex-column', 'choice__modal')
-            const content = cardModal(modal, obj.card, obj.resources);
-            modal.open(content);
+        if (obj.card) {
+            new CardModal(obj.username, obj.card, obj.resources);
         }
 
     })
@@ -260,37 +297,80 @@ const FIELD_DICTIONARY = {
 
 const CHOICES_TYPE = [1, 3, 4, 6]
 
-function cardModal(modal, card, resources) {
-    let title = document.createElement('h3');
-    title.textContent = `${FIELD_DICTIONARY[card.type]}`;
-    title.classList.add('card__title');
+class CardModal extends Modal{
+    constructor(userName, card, resources) {
+        super(false); 
+        this.modalWindow.classList.add('_flex-column', 'choice__modal');
+        this.isCurrentUser = (userName === user.name);
 
-    let description = document.createElement('span');
-    description.textContent = `${card.description}`;
-    description.classList.add('card__span');
+        this.open([
+            ...this.createTitleAndDescription(userName, card),
+            ...this.createChoices(card, resources),
+        ]);
+    }
 
-    let choiceElems = [];
+    createTitleAndDescription(userName, card) {
+        const title = document.createElement('h3');
+        title.classList.add('card__title');
+    
+        const description = document.createElement('span');
+        description.textContent = `${card.description}`;
+        description.classList.add('card__span');
 
-    if (CHOICES_TYPE.includes(card.type)) {
-        choiceElems = card.choices.map((elem) => {
-            let choice = document.createElement('button');
+        if (this.isCurrentUser) {
+            title.textContent = `${FIELD_DICTIONARY[card.type]}`;
+        } else {
+            title.textContent = `${FIELD_DICTIONARY[card.type]} для ${userName}`;
+        }
+        return [title, description]
+    }
+
+    createChoices(card) {
+        if (CHOICES_TYPE.includes(card.type)) {
+            return this.createOptionsChoices(card);
+        }
+
+        if (card.type === 2) {
+            return this.createIncidentChoice(card);
+        }
+
+        if (card.type === 5) {
+            return this.createOpportunityChoice(card);
+        }
+    }
+    createOptionsChoices(card) {
+        return card.choices.map((elem) => {
+            const choice = document.createElement('button');
             choice.type = 'button';
             choice.textContent = `${elem.text}`;
             choice.classList.add('button');
 
-            choice.addEventListener('click', () => {
-                socket.emit('game:choice', {
-                    type: card.type,
-                    id: card.id,
-                    choiceId: elem.id
-                });
-                modal.close();
-            })
+            console.log(this.isCurrentUser)
+            if (this.isCurrentUser) {
+                choice.addEventListener('click', () => {
+                    socket.emit('game:choice', {
+                        type: card.type,
+                        id: card.id,
+                        choiceId: elem.id
+                    });
+                    this.close();
+                })
+            } else {
+                choice.setAttribute('disabled', 'true')
+                socket.on('game:user-choice', (id) => {
+                    console.log(id)
+                    if (id === elem.id) {
+                        choice.classList.add('button_active');
+                        setTimeout(() => this.close(), 2000);
+                    }
+                })
+            }
+            
             return choice;
         })
     }
-    if (card.type === 2) {
-        let choice = document.createElement('button');
+    createIncidentChoice(card) {
+        const choice = document.createElement('button');
         choice.type = 'button';
         choice.textContent = `OK`;
         choice.classList.add('button');
@@ -302,79 +382,86 @@ function cardModal(modal, card, resources) {
                 id: card.id,
             });
             
-            modal.close();
+            this.close();
 
         })
-        choiceElems.push(choice);
-
+        return [choice]
     }
-    if (card.type === 5) {
-
-
-        let choice = document.createElement('button');
+    createOpportunityChoice(card) {
+        const choice = document.createElement('button');
         choice.type = 'button';
         choice.textContent = `OK`;
         choice.classList.add('button');
 
         choice.addEventListener('click', () => {
-            modal.close();
-            const opportunityModal = new Modal();
-            const content = opportunityModalContent(opportunityModal, card, resources);
-            opportunityModal.open(content);
+            this.close();
+            new OpportunityModal(card, resources);
         })
-        choiceElems.push(choice);
-
+        return [choice]
     }
-    return [title, description, ...choiceElems];
 }
 
-function opportunityModalContent(modal, card, resources) {
-    let title = document.createElement('h3');
-    title.classList.add('card__title');
-    let description = document.createElement('span');
-    description.classList.add('card__span');
+class OpportunityModal extends Modal {
+    constructor(card, resources) {
+        super(false);
+        this.title = document.createElement('h3');
+        this.title.classList.add('card__title');
+        this.title.textContent = `${FIELD_DICTIONARY[card.type]}`;
 
-    let choice = document.createElement('button');
-    choice.type = 'button';
-    choice.textContent = `OK`;
-    choice.classList.add('button');
-
-    if ((resources.lives >= 10 && resources.white >= 10) || (resources.lives >= 15 && resources.money >= 100)){
-        title.textContent = `${FIELD_DICTIONARY[card.type]}`;
-        description.textContent = 'Поздравляю! Вы переходите на внешний круг.';
-        choice.addEventListener('click', () => {
-            modal.close();
+        this.description = document.createElement('span');
+        this.description.classList.add('card__span');
+    
+        this.choice = document.createElement('button');
+        this.choice.type = 'button';
+        this.choice.textContent = `OK`;
+        this.choice.classList.add('button');
+        this.choice.addEventListener('click', () => {
+            this.close();
         })
+
+        this.outerAvailable(resources, card)
+    }
+
+    outerAvailable({ white, lives, money }, card) {
+        if ((lives >= 10 && white >= 10) || (lives >= 15 && money >= 100)){
+            this.successfull(card);
+        } else if (this.checkOuterMove({ white, lives, money })){
+            this.rollDice(card);
+        } else {
+            this.fail(card);
+        }
+    }
+
+    successfull(card) {
+        this.description.textContent = 'Поздравляю! Вы переходите на внешний круг.';
 
         socket.emit('game:choice', {
             type: card.type,
             outer: true,
         })
+    }
 
-    } else if (checkOuterMove(resources)){
-        title.textContent = `${FIELD_DICTIONARY[card.type]}`;
-        description.textContent = 'К сожалению, Вам не хватает ресурсов, бросьте кубик, чтобы испытать свои силы.';
-        choice.addEventListener('click', () => {
-            modal.close();
-        })
+    rollDice(card) {
+        this.description.textContent = 'К сожалению, Вам не хватает ресурсов, бросьте кубик, чтобы испытать свои силы.';
+ 
         diceButton.removeAttribute('disabled')
         diceButton.addEventListener('click',() => diceResourses(resources), { once: true });
-    } else {
-        description.textContent = 'В следующий раз повезет больше';
-        choice.addEventListener('click', () => {
-            modal.close();
-        })
+    }
+
+    fail(card) {
+        this.description.textContent = 'В следующий раз повезет больше';
 
         socket.emit('game:choice', {
             type: card.type,
             outer: false,
         })
     }
-    return [title, description, choice];
-}
 
-function checkOuterMove(resources){
-    return (((resources.lives + 6) >= 10 && resources.white >= 10) || (resources.lives >= 10 && (resources.white + 6) >= 10) || ((resources.lives + 6) >= 15 && resources.money >= 100))
+    checkOuterMove({ white, lives, money }) {
+        return (((lives + 6) >= 10 && white >= 10) 
+                || (lives >= 10 && (white + 6) >= 10) 
+                || ((lives + 6) >= 15 && money >= 100))
+    }
 }
 
 function blabla(resource, diceResult){
@@ -734,33 +821,3 @@ function getChip(priority) {
     return chips[priority];
 }
 
-class Modal {
-
-    constructor(bgClose = true){
-        this.modal = document.createElement('div');
-        this.modal.classList.add('modal', '_flex-center');
-
-        this.modalBackground = document.createElement('div');
-        this.modalBackground.classList.add('modal-background');
-
-        this.modalWindow = document.createElement('div');
-        this.modalWindow.classList.add('modal-window', 'card');
-
-        this.modal.append(this.modalBackground, this.modalWindow);
-
-        if (bgClose) {
-            this.modalBackground.addEventListener('click', this.close, {once: true})
-        }
-        
-
-    }
-    
-    open(content){
-        this.modalWindow.append(...content);
-        document.body.appendChild(this.modal);
-    }
-
-    close = () => {
-        this.modal.remove();
-    }
-}
