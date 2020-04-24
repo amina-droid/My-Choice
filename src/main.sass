@@ -13,11 +13,20 @@ button
     background: none
 
 .button
-    font-size: 16px
     min-height: 40px
+    max-width: 500px
+
+    padding: 10px
+
+    font-size: 16px
+    line-height: 1.25em
 
     border: 1px solid #a0a0a0
     background-color: white
+
+    &:disabled
+        cursor: not-allowed
+
     &_active
         background-color: rgb(0, 255, 153)
 
@@ -139,9 +148,11 @@ button
 .chat
     height: 400px
 
+
     &, &__open-button
         bottom: 20px
         right: 20px
+        z-index: 10000
 
     &__open-button
         border-radius: 50%
@@ -150,7 +161,7 @@ button
         height: 70px
 
         position: fixed
-        z-index: 1
+        
 
         background: white
 
