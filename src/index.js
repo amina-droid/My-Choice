@@ -264,7 +264,6 @@ socket.on('game:players', (users) => {
         removedChips.forEach(chip => {
             removeChip(chip);
         })
-
     }
     const removedChipsDream = Object.keys(chipsDream).filter(key => {
         return !users.some(obj => {
@@ -275,7 +274,6 @@ socket.on('game:players', (users) => {
         removedChipsDream.forEach(chip => {
             removeChipDream(chip);
         })
-
     }
     users
         .sort((a, b) => {
@@ -345,11 +343,37 @@ socket.on('game:players', (users) => {
             if (obj.card) {
                 new CardModal(obj.username, obj.card, obj.resources);
             }
-
+            if (obj.winner) {
+                const modal = new Modal();
+                const content = winner(modal, obj.username);
+                modal.open(content);
+            }
         })
     console.log(users)
 
 })
+
+function winner(modal, username) {
+    let description = document.createElement('span');
+    description.classList.add('card__span');
+
+    let choice = document.createElement('button');
+    choice.type = 'button';
+    choice.textContent = `OK`;
+    choice.classList.add('button')
+
+    choice.addEventListener('click', () => {
+        modal.close();
+        leaveRoom();
+    })
+    if (username === user.name) {
+        description.textContent = 'Поздравляю! Вы выиграли!';
+    } else {
+        description.textContent = `${username} выиграл`;
+    }
+    return [description, choice];
+}
+
 function getRecourseString(res) {
     return (res || res === 0) ? res : '-'
 }
@@ -830,21 +854,8 @@ function closeGame(modal) {
     buttonY.classList.add('form__button', 'button', '_two-button');
 
     buttonY.addEventListener('click', () => {
-        socket.emit('room:leave', { roomName: user.roomName })
-        user.roomName = '';
-        game.classList.add(HIDDEN);
-        isGameStarted = false;
-        rooms.classList.remove(HIDDEN);
         modal.close();
-        playersTable.innerHTML = '';
-        diceButton.classList.add(HIDDEN)
-        Object.keys(chips).forEach(chip => {
-            removeChip(chip);
-        })
-        Object.keys(chipsDream).forEach(chip => {
-            removeChipDream(chip);
-        })
-
+        leaveRoom();
     })
 
     let buttonN = document.createElement('button');
@@ -857,6 +868,23 @@ function closeGame(modal) {
     })
     return [title, buttonY, buttonN];
 
+}
+
+function leaveRoom() {
+    socket.emit('room:leave', { roomName: user.roomName })
+    user.roomName = '';
+    game.classList.add(HIDDEN);
+    isGameStarted = false;
+    rooms.classList.remove(HIDDEN);
+    
+    playersTable.innerHTML = '';
+    diceButton.classList.add(HIDDEN)
+    Object.keys(chips).forEach(chip => {
+        removeChip(chip);
+    })
+    Object.keys(chipsDream).forEach(chip => {
+        removeChipDream(chip);
+    })
 }
 
 function formRoom(modal) {
