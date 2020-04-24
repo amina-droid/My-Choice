@@ -344,15 +344,18 @@ socket.on('game:players', (users) => {
                 new CardModal(obj.username, obj.card, obj.resources);
             }
             if (obj.winner) {
-                const modal = new Modal();
-                const content = winner(modal, obj.username);
-                modal.open(content);
+                if (!isWinner) {
+                    isWinner = true;
+                    const modal = new Modal();
+                    const content = winner(modal, obj.username);
+                    modal.open(content);
+                }
             }
         })
     console.log(users)
 
 })
-
+let isWinner = false; 
 function winner(modal, username) {
     let description = document.createElement('span');
     description.classList.add('card__span');
