@@ -454,7 +454,7 @@ class CardModal extends Modal {
                     const choiceId = Number(id);
                     if (choiceId === elem.id) {
                         choice.classList.add('button_active');
-                        setTimeout(() => this.close(), 3000);
+                        setTimeout(() => this.close(), 1500);
                     }
                 })
             }
