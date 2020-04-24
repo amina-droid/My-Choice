@@ -4,7 +4,6 @@ import SimpleScrollbar from 'simple-scrollbar';
 import 'simple-scrollbar/simple-scrollbar.css';
 import 'normalize.css';
 import './main.sass';
-import { AST_ObjectGetter } from 'terser';
 
 SimpleScrollbar.initAll();
 const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:7000' : 'http://xn--72-9kcd8arods1i.xn--p1ai';
@@ -120,6 +119,49 @@ const BOTTOM_OUTER = [
     24, 25, 26, 27, 28, 29
 ]
 
+const LEFT_DREAM = [
+    2, 6, 8
+]
+
+const TOP_DREAM = [
+    12
+]
+
+const RIGHT_DREAM = [
+    16, 20
+]
+
+const BOTTOM_DREAM = [
+    24, 28
+]
+
+function getDreamPosition(user, dreamCell) {
+    if (LEFT_DREAM.includes(dreamCell)) {
+        return {
+            x: 110 - user.priority * 15,
+            y: 660 - dreamCell * 78,
+        }
+    }
+    if (TOP_DREAM.includes(dreamCell)) {
+        return {
+            x: 110 - user.priority * 15 + (dreamCell - 8) * 131,
+            y: 36,
+        }
+    }
+    if (RIGHT_DREAM.includes(dreamCell)) {
+        return {
+            x: 1027 - user.priority * 15,
+            y: 36 + (dreamCell - 15) * 78,
+        }
+    }
+    if (BOTTOM_DREAM.includes(dreamCell)) {
+        return {
+            x: 1027 - user.priority * 15 - (dreamCell - 23) * 131,
+            y: 660,
+        }
+    }
+}
+
 function getPosition(user) {
     const odd = user.priority % 2;
 
@@ -213,8 +255,31 @@ let startGameButton;
 
 socket.on('game:players', (users) => {
     playersTable.innerHTML = '';
+    const removedChips = Object.keys(chips).filter(key => {
+        return !users.some(obj => {
+            return obj.priority === key;
+        })
+    })
+    if (removedChips.length) {
+        removedChips.forEach(chip => {
+            removeChip(chip);
+        })
+
+    }
+    const removedChipsDream = Object.keys(chipsDream).filter(key => {
+        return !users.some(obj => {
+            return obj.priority === key;
+        })
+    })
+    if (removedChipsDream.length) {
+        removedChipsDream.forEach(chip => {
+            removeChipDream(chip);
+        })
+
+    }
     users
         .sort((a, b) => {
+            
             if (a.gameover && b.gameover) {
 
                 if (a.priority > b.priority) return 1;
@@ -226,12 +291,10 @@ socket.on('game:players', (users) => {
             else return 0;
         })
         .forEach(obj => {
-            console.log(user.name, obj.username)
             if (user.name === obj.username && obj.admin && !isGameStarted) {
                 createButtonStartGame();
 
             }
-
             if (obj.resources) {
                 let player = document.createElement('tr');
                 player.setAttribute('align', 'center');
@@ -247,7 +310,6 @@ socket.on('game:players', (users) => {
 
                 if (obj.currentMove) {
                     player.classList.add('player__current');
-                    console.log(player)
                 }
                 if (obj.gameover) {
                     player.classList.add('player__gameover')
@@ -271,7 +333,15 @@ socket.on('game:players', (users) => {
                     chip.setAttribute(key, chipPos[key]);
                 })
             }
+            if (isGameStarted && obj.dream) {
+                const chipDream = getChipDream(obj.priority);
 
+                const chipDreamPos = getDreamPosition(obj, obj.dream);
+
+                Object.keys(chipDreamPos).forEach(key => {
+                    chipDream.setAttribute(key, chipDreamPos[key]);
+                })
+            }
             if (obj.card) {
                 new CardModal(obj.username, obj.card, obj.resources);
             }
@@ -345,7 +415,6 @@ class CardModal extends Modal {
             choice.textContent = `${elem.text}`;
             choice.classList.add('button');
 
-            console.log(this.isCurrentUser)
             if (this.isCurrentUser) {
                 choice.addEventListener('click', () => {
                     socket.emit('game:choice', {
@@ -668,7 +737,6 @@ socket.on('rooms', (data) => {
     roomList = []
 
     data.rooms.forEach(room => {
-        console.log(room.id)
 
         let roomCard = document.createElement('button');
         roomCard.type = 'button'
@@ -691,8 +759,6 @@ socket.on('rooms', (data) => {
 
 
         roomList.push(roomCard);
-
-        console.log(room)
     });
     rooms.prepend(...roomList)
 
@@ -767,8 +833,18 @@ function closeGame(modal) {
         socket.emit('room:leave', { roomName: user.roomName })
         user.roomName = '';
         game.classList.add(HIDDEN);
+        isGameStarted = false;
         rooms.classList.remove(HIDDEN);
         modal.close();
+        playersTable.innerHTML = '';
+        diceButton.classList.add(HIDDEN)
+        Object.keys(chips).forEach(chip => {
+            removeChip(chip);
+        })
+        Object.keys(chipsDream).forEach(chip => {
+            removeChipDream(chip);
+        })
+
     })
 
     let buttonN = document.createElement('button');
@@ -812,10 +888,25 @@ function formRoom(modal) {
     return [titleRoom, form];
 }
 
+const chipsDream = {};
+
+function getChipDream(priority) {
+    if (chipsDream[priority]) {
+        return chipsDream[priority];
+    }
+
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#star_${priority}`);
+    use.setAttribute('x', '0');
+    use.setAttribute('y', '0');
+    svgGame.append(use);
+    chipsDream[priority] = use;
+
+    return chipsDream[priority];
+}
 
 const chips = {};
 function getChip(priority) {
-    console.log({ chips })
     if (chips[priority]) {
         return chips[priority];
     }
@@ -830,3 +921,12 @@ function getChip(priority) {
     return chips[priority];
 }
 
+function removeChip(i) {
+    chips[i].remove();
+    delete chips[i];
+}
+
+function removeChipDream(i) {
+    chipsDream[i].remove();
+    delete chipsDream[i];
+}
