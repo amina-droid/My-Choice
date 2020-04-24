@@ -457,7 +457,7 @@ class CardModal extends Modal {
                     const choiceId = Number(id);
                     if (choiceId === elem.id) {
                         choice.classList.add('button_active');
-                        setTimeout(() => this.close(), 1500);
+                        setTimeout(() => this.close(), 1000);
                     }
                 })
             }
@@ -888,6 +888,7 @@ function leaveRoom() {
     Object.keys(chipsDream).forEach(chip => {
         removeChipDream(chip);
     })
+    isWinner = false;
 }
 
 function formRoom(modal) {
