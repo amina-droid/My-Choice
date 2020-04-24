@@ -2,9 +2,9 @@
     .game__header.js-game__header
         .game__contain_players
             include ./../players-list/players-list.pug
-        .game__contain_dice._flex-center.js-game__contain_dice
+        .game__contain_controlls._flex-center
+            button(type="button").button.game__start.js-game__start._hidden Начать игру
             button(type="button").button.dice__button.js-dice__button._hidden Кинуть кубики
-                .dot
             include ./../icons/dice1.svg
             include ./../icons/dice2.svg
             include ./../icons/dice3.svg

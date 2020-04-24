@@ -25,6 +25,7 @@ let game = document.querySelector('.js-page_game');
 let gameHeader = document.querySelector('.js-game__header');
 let gameClose = document.querySelector('.js-game__cancel');
 let diceButton = document.querySelector('.js-dice__button');
+let startGameButton = document.querySelector('.js-game__start');
 
 let playerOpenButton = document.querySelector('.js-players__open-button');
 let playerList = document.querySelector('.js-players__list');
@@ -251,7 +252,7 @@ function getPosition(user) {
 }
 
 
-let startGameButton;
+
 
 socket.on('game:players', (users) => {
     playersTable.innerHTML = '';
@@ -316,7 +317,7 @@ socket.on('game:players', (users) => {
 
 
 
-            if (user.name === obj.username && obj.currentMove && obj.dream) {
+            if (user.name === obj.username && obj.currentMove) {
                 diceButton.classList.remove(HIDDEN);
                 diceButton.removeAttribute('disabled');
                 diceButton.addEventListener('click', diceMove, { once: true })
@@ -692,19 +693,15 @@ function choiceDreamModal(modal) {
 
 let isGameStarted = false;
 function createButtonStartGame() {
-    if (startGameButton) return;
+    if (!startGameButton.classList.contains(HIDDEN)) return;
 
-    startGameButton = document.createElement('button');
-    startGameButton.type = 'button';
-    startGameButton.classList.add('button', 'game__start');
-    startGameButton.textContent = 'Начать игру';
-
+    startGameButton.classList.remove(HIDDEN);
     startGameButton.addEventListener('click', () => {
         socket.emit('game:start');
-        startGameButton.remove();
+        startGameButton.classList.add(HIDDEN)
     })
 
-    gameHeader.prepend(startGameButton);
+    
 }
 
 const txt = document.querySelector('.js-chat__textarea');
@@ -881,7 +878,11 @@ function leaveRoom() {
     rooms.classList.remove(HIDDEN);
     
     playersTable.innerHTML = '';
-    diceButton.classList.add(HIDDEN)
+
+    diceButton.classList.add(HIDDEN);
+    dices.forEach(dice => {
+        dice.classList.add(HIDDEN)
+    })
     Object.keys(chips).forEach(chip => {
         removeChip(chip);
     })
