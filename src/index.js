@@ -17,6 +17,7 @@ let chat = document.querySelector('.js-chat');
 let chatForm = document.querySelector('.js-chat__form');
 let chatList = document.querySelector('.js-chat__list');
 let chatClose = document.querySelector('.js-chat__cancel');
+const chatTextarea = document.querySelector('.js-chat__textarea');
 
 let rooms = document.querySelector('.js-page_rooms');
 let newRoom = document.querySelector('.js-card_mini');
@@ -704,8 +705,8 @@ function createButtonStartGame() {
     
 }
 
-const txt = document.querySelector('.js-chat__textarea');
-txt.addEventListener('keydown', (e) => {
+
+chatTextarea.addEventListener('keydown', (e) => {
 
     if (!e.shiftKey && e.keyCode == 13) {
         e.preventDefault();
@@ -747,7 +748,8 @@ socket.on('chat:message', (e) => {
 
 
 chatClose.addEventListener('click', () => {
-    chat.classList.add(HIDDEN)
+    chat.classList.add(HIDDEN);
+    chatTextarea.blur();
     chatIcon.classList.remove(HIDDEN)
 })
 
@@ -818,6 +820,7 @@ loginForm.addEventListener('submit', (e) => {
 
 chatIcon.addEventListener('click', () => {
     chat.classList.remove(HIDDEN);
+    chatTextarea.focus();
     chatIcon.classList.add(HIDDEN);
     newMessage.classList.add(HIDDEN)
 })
@@ -827,6 +830,7 @@ chatForm.addEventListener('submit', (e) => {
     const message = e.target.elements.message.value;
     socket.emit('chat:message', { name: user.name, message, color: user.color });
     e.target.elements.message.value = '';
+    chatTextarea.focus();
 })
 
 newRoom.addEventListener('click', () => {
@@ -894,7 +898,7 @@ function leaveRoom() {
 
 function formRoom(modal) {
     let titleRoom = document.createElement('h3');
-    titleRoom.textContent = 'Введите название комнаты'
+    titleRoom.textContent = 'Введите название комнаты';
     titleRoom.classList.add('card__title');
 
     let form = document.createElement('form');
@@ -902,12 +906,12 @@ function formRoom(modal) {
 
     let inputRoom = document.createElement('input');
     inputRoom.type = 'text';
-    inputRoom.name = 'roomName'
-    inputRoom.classList.add('form__input')
+    inputRoom.name = 'roomName';
+    inputRoom.classList.add('form__input');
 
     let buttonRoom = document.createElement('button');
     buttonRoom.type = 'submit';
-    buttonRoom.textContent = 'Создать'
+    buttonRoom.textContent = 'Создать';
     buttonRoom.classList.add('form__button', 'button');
 
     form.addEventListener('submit', (e) => {
@@ -916,7 +920,6 @@ function formRoom(modal) {
         modal.close();
         openRoom(roomName, 'room:create');
     })
-
     form.append(inputRoom, buttonRoom);
     return [titleRoom, form];
 }
