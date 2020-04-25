@@ -38,7 +38,13 @@ let dices = document.querySelectorAll('.js-dice');
 
 let dreamPaths = document.querySelectorAll('.js-dream');
 
-let svgGame = document.querySelector('.js-svg_game')
+let svgGame = document.querySelector('.js-svg_game');
+
+let saleDarkButton = document.querySelector('.js-sale-dark__button');
+let saleList = document.querySelector('.js-sale__list');
+let saleTitle = document.querySelector('.js-sale__title');
+let saleBody = document.querySelector('.js-sale__body');
+let saleListClose = document.querySelector('.js-sale__cancel')
 
 const HIDDEN = '_hidden';
 
@@ -48,6 +54,7 @@ const user = {
     color: generateColor(),
     roomName: '',
     priority: 0,
+    resources: {},
 };
 class Modal {
 
@@ -104,6 +111,7 @@ function diceMove() {
     })
     diceButton.setAttribute('disabled', 'true')
 
+    closeSaleList();
 }
 const LEFT_OUTER = [
     0, 1, 2, 3, 4, 5, 6, 7, 8
@@ -307,6 +315,17 @@ socket.on('game:players', (users) => {
                 <td class="td">${getRecourseString(obj.resources.lives)}</td>`
 
                 playersTable.append(player);
+                if (user.name === obj.username) {
+                    user.resources = obj.resources;
+                    
+                    console.log(obj.resources)
+                    if (obj.resources.dark) {
+                        saleDarkButton.removeAttribute('disabled');
+                    } else {
+                        saleDarkButton.setAttribute('disabled', 'true')
+                    }
+                    
+                }
 
                 if (obj.currentMove) {
                     player.classList.add('player__current');
@@ -315,8 +334,6 @@ socket.on('game:players', (users) => {
                     player.classList.add('player__gameover')
                 }
             }
-
-
 
             if (user.name === obj.username && obj.currentMove) {
                 diceButton.classList.remove(HIDDEN);
@@ -341,6 +358,9 @@ socket.on('game:players', (users) => {
                 Object.keys(chipDreamPos).forEach(key => {
                     chipDream.setAttribute(key, chipDreamPos[key]);
                 })
+                saleDarkButton.classList.remove(HIDDEN);
+
+
             }
             if (obj.card) {
                 new CardModal(obj.username, obj.card, obj.resources);
@@ -355,8 +375,77 @@ socket.on('game:players', (users) => {
             }
         })
     console.log(users)
+});
 
-})
+saleDarkButton.addEventListener('click', saleDark)
+
+
+function saleDark() {
+    saleTitle.innerHTML = '';
+    saleBody.innerHTML = '';
+    saleDarkButton.classList.add(HIDDEN);
+    saleList.classList.remove(HIDDEN);
+    const { resources } = user;
+
+    let saleButtons = [];
+
+    let description = document.createElement('span');
+    description.classList.add('card__span');
+
+    if (resources.money >= 50) {
+        let saleDarkForMoney = document.createElement('button');
+        saleDarkForMoney.classList.add('button');
+        saleDarkForMoney.type = 'button';
+        saleDarkForMoney.textContent = 'Обменять за 50₽';
+        saleButtons.push(saleDarkForMoney);
+        saleDarkForMoney.addEventListener('click', () => {
+            socket.emit('game:remove-dark', 'money');
+            closeSaleList()
+        }, { once: true })
+        
+        
+    }
+    if (resources.white >= 5) {
+        let saleDarkForWhite = document.createElement('button');
+        saleDarkForWhite.classList.add('button');
+        saleDarkForWhite.type = 'button';
+        saleDarkForWhite.textContent = 'Обменять за 5 СК (Б)';
+        saleButtons.push(saleDarkForWhite);
+        saleDarkForWhite.addEventListener('click', () => {
+            socket.emit('game:remove-dark', 'white');
+            closeSaleList()
+        }, { once: true })
+        
+
+    }
+    if (resources.lives >= 5) {
+        let saleDarkForLives = document.createElement('button');
+        saleDarkForLives.classList.add('button');
+        saleDarkForLives.type = 'button';
+        saleDarkForLives.textContent = 'Обменять за 5Ж';
+        saleButtons.push(saleDarkForLives);
+        saleDarkForLives.addEventListener('click', () => {
+            socket.emit('game:remove-dark', 'lives');
+            closeSaleList()
+        }, { once: true })
+        
+    }
+    if (!saleButtons.length) {
+        description.textContent = 'У Вас недостаточно ресурсов';
+    } else {
+        description.textContent = 'Вы можете обменять 1 СК (Ч)'
+    }
+    saleTitle.append(description);
+    saleBody.append(...saleButtons);
+}
+
+saleListClose.addEventListener('click', closeSaleList)
+
+function closeSaleList() {
+    saleList.classList.add(HIDDEN);
+    saleDarkButton.classList.remove(HIDDEN);
+}
+
 let isWinner = false; 
 function winner(modal, username) {
     let description = document.createElement('span');

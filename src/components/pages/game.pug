@@ -11,7 +11,13 @@
             include ./../icons/dice4.svg
             include ./../icons/dice5.svg
             include ./../icons/dice6.svg
-    
+        button(type="button").button.sale-dark__button.js-sale-dark__button._hidden Обменять СК (Ч)
+        .sale__list.popover._flex-column.js-sale__list._hidden
+            .popover__header.sale__header.js-sale__header
+                .sale__title.js-sale__title
+                button(type="button").popover__cancel.js-sale__cancel
+                    include ../icons/cancel.svg
+            .popover__body.sale__body._flex-column.js-sale__body
         button(type="button").game__cancel.js-game__cancel
             include ./../icons/cancel.svg
 
