@@ -12,12 +12,6 @@ const socket = io.connect(apiUrl);
 let loginForm = document.querySelector('.js-form_login');
 let login = document.querySelector('.js-page_login');
 
-let chatIcon = document.querySelector('.js-chat__open-button');
-let chat = document.querySelector('.js-chat');
-let chatForm = document.querySelector('.js-chat__form');
-let chatList = document.querySelector('.js-chat__list');
-let chatClose = document.querySelector('.js-chat__cancel');
-const chatTextarea = document.querySelector('.js-chat__textarea');
 
 let rooms = document.querySelector('.js-page_rooms');
 let newRoom = document.querySelector('.js-card_mini');
@@ -48,14 +42,208 @@ let saleListClose = document.querySelector('.js-sale__cancel')
 
 const HIDDEN = '_hidden';
 
-
-
 const user = {
     color: generateColor(),
     roomName: '',
     priority: 0,
     resources: {},
 };
+
+class ChatContainer {
+    constructor() {
+        this.btnOpen = document.querySelector('.js-chat__open-button');
+        this.btnClose = document.querySelector('.js-chat__cancel');
+        this.containerTabs = document.querySelector('.js-chat__tabs');
+        this.notification = this.createNotification();
+        this.btnOpen.prepend(this.notification);
+        this.chats = {};
+        this.tabs = {};
+        this.container = document.querySelector('.js-chat');
+        this.currentChat = this.createChat('Общий чат', 'chat:message');
+
+        this.addBtnOpenListener();
+        this.addBtnCloseListener();
+    }
+    addBtnCloseListener() {
+        this.btnClose.addEventListener('click', () => {
+            this.container.classList.add(HIDDEN);
+            this.currentChat.textarea.blur();
+            this.btnOpen.classList.remove(HIDDEN)
+        })
+    }
+    addBtnOpenListener() {
+        this.btnOpen.addEventListener('click', () => {
+            this.container.classList.remove(HIDDEN);
+            this.currentChat.textarea.focus();
+            this.btnOpen.classList.add(HIDDEN);
+            this.notification.classList.add(HIDDEN)
+        })
+    }
+
+    unhide() {
+        this.btnOpen.classList.remove(HIDDEN);
+    }
+    createChat(name, listen) {
+        const callback = () => {
+            if(this.container.classList.contains(HIDDEN)) {
+                this.notification.classList.remove(HIDDEN);
+            }
+        }
+        const chat = new Chat(listen, callback);
+        this.chats = {
+            ...this.chats, 
+            [name]: chat,
+        };
+        const tab = document.createElement('button');
+        tab.textContent = name;
+        tab.classList.add('tabs__button');
+        tab.type = 'button';
+        tab.addEventListener('click', () => {
+            this.setCurrentChat(name);
+        })
+        this.tabs = {
+            ...this.tabs,
+            [name]: tab,
+        };
+        this.containerTabs.append(tab);
+        this.container.append(chat.body, chat.form);
+        this.setCurrentChat(name);
+        return chat;
+    }
+
+    removeChat(name) {
+        if (this.currentChat === this.chats[name]) {
+            this.setCurrentChat('Общий чат');
+        } 
+
+        this.tabs[name].remove();
+        delete this.tabs[name];
+        this.chats[name].remove();
+        delete this.chats[name];
+    }
+
+    setCurrentChat(name) {
+        this.chats[name].active();
+        const { [name]: currentChat, ...otherChats } = this.chats;
+        Object.values(otherChats).forEach(chat => chat.disactive());
+        this.currentChat = currentChat;
+
+        this.tabs[name].setAttribute('disabled', 'true');
+        const { [name]: currentTab, ...otherTabs } = this.tabs;
+        Object.values(otherTabs).forEach(tab => tab.removeAttribute('disabled'));
+    }
+
+    createNotification() {
+        const notification = document.createElement('div');
+        notification.classList.add('chat__new-message', HIDDEN);
+        return notification;
+    }
+}
+
+class Chat {
+    constructor(listen, callback) {
+        this.body = document.createElement('div');
+        this.body.classList.add('chat__body');
+
+        this.list = document.createElement('ul');
+        this.list.classList.add('chat__list', '_flex-column');
+
+        this.body.append(this.list);
+
+        this.form = document.createElement('form');
+        this.form.classList.add('chat__form');
+        this.form.name = 'chat';
+        this.textarea = this.createTextarea();
+        this.sendButton = this.createSendButton();
+        this.form.append(this.textarea, this.sendButton);
+
+        this.addSubmitListener(listen);
+        this.addNewMessageListener(listen, callback);
+
+        this.addTextareaListener();
+        
+        SimpleScrollbar.initEl(this.body)
+    }
+
+    addSubmitListener(listen) {
+        this.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = e.target.elements.message.value;
+            socket.emit(listen, { name: user.name, message, color: user.color });
+            e.target.elements.message.value = '';
+            this.textarea.focus();
+        })
+    } 
+    addNewMessageListener(listen, callback) {
+        socket.on(listen, (e) => {
+            let message = document.createElement('li');
+            this.list.append(message);
+        
+            if (user.name === e.name) {
+                message.classList.add('chat__message_my', 'chat__message');
+                message.innerHTML = `<span class="chat__text">${e.message}</span>`;
+            } else {
+                message.innerHTML = `<span class="chat__author" style="color: ${e.color}">${e.name}</span> <span class="chat__text">${e.message}</span>`;
+                message.classList.add('chat__message_company', 'chat__message', '_flex-column');
+            }
+            callback();
+            SimpleScrollbar.initAll();
+            const scrollContainer = this.body.querySelector('.ss-content');
+            scrollContainer.scrollTop = 9999;
+        })
+    }
+    createTextarea() {
+        const textarea = document.createElement('textarea');
+        textarea.classList.add('chat__textarea');
+        textarea.name = 'message';
+        return textarea;
+    }
+    addTextareaListener() {
+        this.textarea.addEventListener('keydown', (e) => {
+
+            if (!e.shiftKey && e.keyCode == 13) {
+                e.preventDefault();
+                const event = new Event('submit', {
+                    'bubbles': true,
+                    'cancelable': true
+                });
+        
+                this.form.dispatchEvent(event);
+        
+            }
+            return true;
+        })
+    }
+    createSendButton() {
+        const sendButton = document.createElement('button');
+        sendButton.classList.add('chat__button');
+        sendButton.type = 'submit';
+        sendButton.innerHTML = `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+        viewBox="0 0 469.038 469.038" style="enable-background:new 0 0 469.038 469.038;" xml:space="preserve">
+<g>
+<path d="M465.023,4.079c-3.9-3.9-9.9-5-14.9-2.8l-442,193.7c-4.7,2.1-7.8,6.6-8.1,11.7s2.4,9.9,6.8,12.4l154.1,87.4l91.5,155.7
+c2.4,4.1,6.9,6.7,11.6,6.7c0.3,0,0.5,0,0.8,0c5.1-0.3,9.5-3.4,11.6-8.1l191.5-441.8C470.123,13.879,469.023,7.979,465.023,4.079z
+M394.723,54.979l-226.2,224.7l-124.9-70.8L394.723,54.979z M262.223,425.579l-74.5-126.9l227.5-226L262.223,425.579z"/>
+</g>
+</svg>`;
+        return sendButton;
+    }
+    remove() {
+        this.body.remove();
+        this.form.remove();
+    }
+
+    disactive() {
+        this.body.classList.add(HIDDEN);
+        this.form.classList.add(HIDDEN);
+    }
+
+    active() {
+        this.body.classList.remove(HIDDEN);
+        this.form.classList.remove(HIDDEN);
+    }
+}
+const chatContainer = new ChatContainer();
 class Modal {
 
     constructor(bgClose = true) {
@@ -287,7 +475,7 @@ socket.on('game:players', (users) => {
     }
     users
         .sort((a, b) => {
-            
+
             if (a.gameover && b.gameover) {
 
                 if (a.priority > b.priority) return 1;
@@ -317,14 +505,14 @@ socket.on('game:players', (users) => {
                 playersTable.append(player);
                 if (user.name === obj.username) {
                     user.resources = obj.resources;
-                    
+
                     console.log(obj.resources)
                     if (obj.resources.dark) {
                         saleDarkButton.removeAttribute('disabled');
                     } else {
                         saleDarkButton.setAttribute('disabled', 'true')
                     }
-                    
+
                 }
 
                 if (obj.currentMove) {
@@ -402,8 +590,8 @@ function saleDark() {
             socket.emit('game:remove-dark', 'money');
             closeSaleList()
         }, { once: true })
-        
-        
+
+
     }
     if (resources.white >= 5) {
         let saleDarkForWhite = document.createElement('button');
@@ -415,7 +603,7 @@ function saleDark() {
             socket.emit('game:remove-dark', 'white');
             closeSaleList()
         }, { once: true })
-        
+
 
     }
     if (resources.lives > 5) {
@@ -428,7 +616,7 @@ function saleDark() {
             socket.emit('game:remove-dark', 'lives');
             closeSaleList()
         }, { once: true })
-        
+
     }
     if (!saleButtons.length) {
         description.textContent = 'У Вас недостаточно ресурсов';
@@ -446,7 +634,7 @@ function closeSaleList() {
     saleDarkButton.classList.remove(HIDDEN);
 }
 
-let isWinner = false; 
+let isWinner = false;
 function winner(modal, username) {
     modal.modalWindow.classList.add('_flex-column', 'choice__modal');
     let description = document.createElement('span');
@@ -489,14 +677,14 @@ const CHOICES_TYPE = [1, 3, 4, 6]
 class CardModal extends Modal {
     constructor(userName, card, resources) {
         const isCurrentUser = (userName === user.name);
-        if (isCurrentUser){
+        if (isCurrentUser) {
             super(false);
         } else {
             super(true);
         }
         this.isCurrentUser = isCurrentUser;
         this.modalWindow.classList.add('_flex-column', 'choice__modal');
-        
+
 
         this.open([
             ...this.createTitleAndDescription(userName, card),
@@ -799,56 +987,9 @@ function createButtonStartGame() {
         startGameButton.classList.add(HIDDEN)
     })
 
-    
+
 }
 
-
-chatTextarea.addEventListener('keydown', (e) => {
-
-    if (!e.shiftKey && e.keyCode == 13) {
-        e.preventDefault();
-        const event = new Event('submit', {
-            'bubbles': true,
-            'cancelable': true
-        });
-
-        chatForm.dispatchEvent(event);
-
-    }
-    return true;
-})
-
-const newMessage = document.createElement('div');
-newMessage.classList.add('chat__new-message', HIDDEN);
-chatIcon.prepend(newMessage);
-
-socket.on('chat:message', (e) => {
-    let chatMessage = document.createElement('li');
-    chatList.append(chatMessage);
-
-    if (user.name === e.name) {
-        chatMessage.classList.add('chat__message_my', 'chat__message');
-        chatMessage.innerHTML = `<span class="chat__text">${e.message}</span>`;
-    } else {
-        chatMessage.innerHTML = `<span class="chat__author" style="color: ${e.color}">${e.name}</span> <span class="chat__text">${e.message}</span>`;
-        chatMessage.classList.add('chat__message_company', 'chat__message', '_flex-column');
-    }
-    if (chat.classList.contains(HIDDEN)) {
-        newMessage.classList.remove(HIDDEN);
-    }
-    SimpleScrollbar.initAll();
-    const chatBody = document.querySelector('.js-chat__body');
-    const scrollContainer = chatBody.querySelector('.ss-content');
-    scrollContainer.scrollTop = 9999;
-})
-
-
-
-chatClose.addEventListener('click', () => {
-    chat.classList.add(HIDDEN);
-    chatTextarea.blur();
-    chatIcon.classList.remove(HIDDEN)
-})
 
 
 let roomList = [];
@@ -892,6 +1033,7 @@ function openRoom(roomName, roomEvent) {
     rooms.classList.add(HIDDEN);
     game.classList.remove(HIDDEN);
     user.roomName = roomName;
+    chatContainer.createChat('Комната', 'chat:room-message');
 }
 
 function generateColor() {
@@ -909,26 +1051,15 @@ loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     user.name = e.target.name.value;
     login.classList.add(HIDDEN);
-    chatIcon.classList.remove(HIDDEN);
+    chatContainer.unhide();
     rooms.classList.remove(HIDDEN);
     socket.emit('login', { username: user.name })
 
 })
 
-chatIcon.addEventListener('click', () => {
-    chat.classList.remove(HIDDEN);
-    chatTextarea.focus();
-    chatIcon.classList.add(HIDDEN);
-    newMessage.classList.add(HIDDEN)
-})
 
-chatForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const message = e.target.elements.message.value;
-    socket.emit('chat:message', { name: user.name, message, color: user.color });
-    e.target.elements.message.value = '';
-    chatTextarea.focus();
-})
+
+
 
 newRoom.addEventListener('click', () => {
 
@@ -977,7 +1108,7 @@ function leaveRoom() {
     game.classList.add(HIDDEN);
     isGameStarted = false;
     rooms.classList.remove(HIDDEN);
-    
+
     playersTable.innerHTML = '';
 
     diceButton.classList.add(HIDDEN);
@@ -991,6 +1122,7 @@ function leaveRoom() {
         removeChipDream(chip);
     })
     isWinner = false;
+    chatContainer.removeChat('Комната');
 }
 
 function formRoom(modal) {
@@ -1063,3 +1195,5 @@ function removeChipDream(i) {
     chipsDream[i].remove();
     delete chipsDream[i];
 }
+
+

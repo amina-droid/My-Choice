@@ -145,10 +145,23 @@ button
         width: 25px
         align-self: flex-end
 
+.tabs
+    &__button
+        height: 30px
+        margin-bottom: -1px
+
+        &:disabled
+            color: black
+            border-top-right-radius: 5px
+            border-top-left-radius: 5px
+            border: 1px solid grey
+            border-bottom: none
+            position: relative
+        &:not(:disabled)
+            color: grey
 
 .chat
     height: 400px
-
 
     &, &__open-button
         bottom: 20px
@@ -164,11 +177,12 @@ button
         position: fixed
         
 
-        background: white
+        background: white  
 
     &__form
         display: flex
         align-items: center
+        margin-top: auto
 
     &__textarea
         flex: 1 auto
