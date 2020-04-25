@@ -448,6 +448,7 @@ function closeSaleList() {
 
 let isWinner = false; 
 function winner(modal, username) {
+    modal.modalWindow.classList.add('_flex-column', 'choice__modal');
     let description = document.createElement('span');
     description.classList.add('card__span');
 
@@ -487,9 +488,15 @@ const CHOICES_TYPE = [1, 3, 4, 6]
 
 class CardModal extends Modal {
     constructor(userName, card, resources) {
-        super(false);
+        const isCurrentUser = (userName === user.name);
+        if (isCurrentUser){
+            super(false);
+        } else {
+            super(true);
+        }
+        this.isCurrentUser = isCurrentUser;
         this.modalWindow.classList.add('_flex-column', 'choice__modal');
-        this.isCurrentUser = (userName === user.name);
+        
 
         this.open([
             ...this.createTitleAndDescription(userName, card),
@@ -548,7 +555,7 @@ class CardModal extends Modal {
                     const choiceId = Number(id);
                     if (choiceId === elem.id) {
                         choice.classList.add('button_active');
-                        setTimeout(() => this.close(), 1000);
+                        setTimeout(() => this.close(), 1500);
                     }
                 })
             }
@@ -574,7 +581,7 @@ class CardModal extends Modal {
             })
         } else {
             choice.setAttribute('disabled', 'true');
-            setTimeout(() => this.close(), 3000);
+            setTimeout(() => this.close(), 1500);
         }
         return [choice]
     }
@@ -599,6 +606,7 @@ class CardModal extends Modal {
 class OpportunityModal extends Modal {
     constructor(card, resources) {
         super(false);
+        this.modalWindow.classList.add('_flex-column', 'choice__modal');
         this.title = document.createElement('h3');
         this.title.classList.add('card__title');
         this.title.textContent = `${FIELD_DICTIONARY[card.type]}`;
