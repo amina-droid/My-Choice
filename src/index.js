@@ -418,7 +418,7 @@ function saleDark() {
         
 
     }
-    if (resources.lives >= 5) {
+    if (resources.lives > 5) {
         let saleDarkForLives = document.createElement('button');
         saleDarkForLives.classList.add('button');
         saleDarkForLives.type = 'button';
