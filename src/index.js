@@ -452,6 +452,7 @@ function getPosition(user) {
 
 
 socket.on('game:players', (users) => {
+    console.log('kjdskfv', users)
     playersTable.innerHTML = '';
     const removedChips = Object.keys(chips).filter(key => {
         return !users.some(obj => {
@@ -1009,7 +1010,7 @@ function createButtonStartGame() {
     startGameButton.addEventListener('click', () => {
         socket.emit('game:start');
         startGameButton.classList.add(HIDDEN)
-    })
+    }, { once: true })
 
 
 }
