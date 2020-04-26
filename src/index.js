@@ -866,6 +866,7 @@ function blabla(resourceType, diceResult) {
 }
 
 function youLacky(modal) {
+    modal.modalWindow.classList.add('_flex-column', 'choice__modal');
     let description = document.createElement('span');
     description.textContent = 'Поздравляю! Вы смогли увеличить количество ресурсов и теперь можете перейти на внешний круг.';
     description.classList.add('card__span');
@@ -883,6 +884,7 @@ function youLacky(modal) {
 }
 
 function notThisTime(modal) {
+    modal.modalWindow.classList.add('_flex-column', 'choice__modal');
     let description = document.createElement('span');
     description.textContent = 'В следующий раз повезет больше';
     description.classList.add('card__span');
