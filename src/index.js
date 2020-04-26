@@ -587,6 +587,7 @@ function gameError(modal) {
         modal.close();
         leaveRoom();
     })
+    return [description, buttonOk]
 }
 
 function saleDark() {
