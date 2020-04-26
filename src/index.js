@@ -567,6 +567,27 @@ socket.on('game:players', (users) => {
 
 saleDarkButton.addEventListener('click', saleDark)
 
+socket.on('game:error', () => {
+    const modal = new Modal();
+    const content = gameError(modal);
+    modal.open(content);
+})
+
+function gameError(modal) {
+    const description = document.createElement('span');
+    description.classList.add('card__span');
+    description.textContent = 'К сожалению что-то пошло не так';
+
+    const buttonOk = document.createElement('button');
+    buttonOk.type = 'button';
+    buttonOk.textContent = 'Ok'
+    buttonOk.classList.add('form__button', 'button');
+
+    buttonOk.addEventListener('click', () => {
+        modal.close();
+        leaveRoom();
+    })
+}
 
 function saleDark() {
     saleTitle.innerHTML = '';
