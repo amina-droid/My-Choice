@@ -12,6 +12,17 @@ button
     cursor: pointer
     background: none
 
+ol 
+    counter-reset: section
+    list-style-type: none
+    & > li::before 
+        counter-increment: section
+        content: counters(section,".")
+        margin-right: 5px
+
+li
+    margin-left: -20px
+
 .button
     min-height: 40px
     max-width: 500px
@@ -143,7 +154,8 @@ button
     &__cancel
         height: 25px
         width: 25px
-        align-self: flex-end
+
+
 
 .tabs
     &__button
@@ -160,6 +172,8 @@ button
         &:not(:disabled)
             color: grey
 
+
+
 .chat
     height: 400px
 
@@ -175,7 +189,6 @@ button
         height: 70px
 
         position: fixed
-        
 
         background: white  
 
@@ -247,13 +260,15 @@ button
         width: 50px
         height: 50px
 
-    &_chat
+    &_chat, &_rules
         width: 40px
         height: 40px
     
     &_game
         height: 85vh
         width: 85vw
+
+
 
 .modal
     height: 100vh
@@ -304,6 +319,31 @@ button
         
         display: flex
 
+
+.rules
+    max-width: 430px
+    min-height: 500px
+
+    &, &__open-button
+        bottom: 20px
+        left: 20px
+        z-index: 10000
+
+    &__open-button
+        border-radius: 50%
+
+        width: 70px
+        height: 70px
+
+        position: fixed
+
+        background: white 
+
+    &__body
+        overflow-y: hidden
+        height: 600px
+        margin: 10px
+        line-height: 1.3em
 
 
 .dice

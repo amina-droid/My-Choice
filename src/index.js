@@ -4,6 +4,7 @@ import SimpleScrollbar from 'simple-scrollbar';
 import 'simple-scrollbar/simple-scrollbar.css';
 import 'normalize.css';
 import './main.sass';
+import { rule } from 'postcss';
 
 SimpleScrollbar.initAll();
 const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:7000' : 'http://xn--72-9kcd8arods1i.xn--p1ai';
@@ -39,6 +40,20 @@ let saleList = document.querySelector('.js-sale__list');
 let saleTitle = document.querySelector('.js-sale__title');
 let saleBody = document.querySelector('.js-sale__body');
 let saleListClose = document.querySelector('.js-sale__cancel')
+
+let rulesButton = document.querySelector('.js-rules__open-button');
+let rules = document.querySelector('.js-rules');
+let rulesButtonClose = document.querySelector('.js-rules__cancel');
+
+rulesButtonClose.addEventListener('click', () => {
+    rules.classList.add(HIDDEN);
+    rulesButton.classList.remove(HIDDEN);
+})
+rulesButton.addEventListener('click', () => {
+    rules.classList.remove(HIDDEN);
+    rulesButton.classList.add(HIDDEN);
+})
+
 
 const HIDDEN = '_hidden';
 
