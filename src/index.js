@@ -5,6 +5,7 @@ import 'simple-scrollbar/simple-scrollbar.css';
 import 'normalize.css';
 import './main.sass';
 import { rule } from 'postcss';
+import { Fireworks } from './components/fireworks';
 
 SimpleScrollbar.initAll();
 const apiUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:7000' : 'http://xn--72-9kcd8arods1i.xn--p1ai';
@@ -568,12 +569,17 @@ socket.on('game:players', (users) => {
             }
             if (obj.card) {
                 new CardModal(obj.username, obj.card, obj.resources);
+
             }
             if (obj.winner) {
                 if (!isWinner) {
                     isWinner = true;
                     const modal = new Modal();
                     const content = winner(modal, obj.username);
+                    const canvas = document.createElement('canvas');
+                    modal.modalBackground.append(canvas);
+                    const fireworks = new Fireworks(canvas);
+                    fireworks.run();
                     modal.open(content);
                 }
             }
