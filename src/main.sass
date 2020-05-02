@@ -83,6 +83,10 @@ li
     &_rooms
         flex-wrap: wrap
 
+    &_login
+        justify-content: space-between
+        align-items: center
+
 .card
     background: white
     border-radius: 5px
@@ -90,6 +94,28 @@ li
 
     padding: 20px
     margin: 15px
+
+    &_login
+        margin-top: auto
+        position: relative
+        height: 260px
+        display: flex
+        flex-direction: column
+        justify-content: center
+
+        & > .form
+            opacity: .9
+        &::after
+            top: 0
+            left: 0
+            z-index: 0
+            content: ''
+            opacity: .4
+            position: absolute
+            width: 100%
+            height: 100%
+            background: url(static/img/logo.svg) center no-repeat
+            background-size: contain
 
     &_mini
         min-width: 150px
@@ -106,12 +132,17 @@ li
         font-size: 10px
         color: grey
 
-    &__title
+    &__title, &__subtitle
         margin: 5px
+        position: relative
+        z-index: 1
 
         font-size: 30px
         font-weight: normal
         text-align: center
+
+    &__subtitle
+        font-size: 22px
 
     &__span
         font-size: 20px
@@ -119,9 +150,12 @@ li
         text-align: center
 
         margin: 10px
+        
 
 .form
     font-size: 30px
+    position: relative
+    z-index: 1
 
     &__input, &__button
         height: 40px
@@ -268,6 +302,8 @@ li
         height: 85vh
         width: 85vw
 
+    &_logo
+        height: 200px
 
 
 .modal
@@ -322,7 +358,7 @@ li
 
 .rules
     max-width: 430px
-    min-height: 500px
+    max-height: 650px
 
     &, &__open-button
         bottom: 20px
@@ -430,3 +466,23 @@ li
     &__list
         position: absolute
         right: 100px
+
+.partner
+    &__container
+        margin-top: auto
+        flex-wrap: wrap
+        opacity: 0.9
+        justify-content: space-around
+        max-width: 360px
+
+    &__img
+        max-width: 100px
+
+        &_mini
+            width: 85px
+
+    &__title
+        text-align: center
+        margin: 0
+        margin-bottom: 10px
+        flex-basis: 100%

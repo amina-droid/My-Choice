@@ -1,6 +1,12 @@
-.page.page_login._flex-center.js-page_login
-    .card
-        h3.card__title Введите свое имя
+.page.page_login._flex-column.js-page_login
+    .card.card__container.card_login
+        h3.card__title Игра "Мой выбор"
+        h3.card__subtitle Введите свое имя
         form(name="login").form.form_login._flex-column.js-form_login
             input(type="text", name="name", required, autofocus).form__input
             button(type="submit").form__button.button Войти
+    .partner__container._flex-center.card
+        h4.partner__title При поддержке:
+        img(src=require("./../../static/img/partner-1.png").default).partner__img
+        img(src=require("./../../static/img/partner-3.png").default).partner__img
+        img(src=require("./../../static/img/partner-2.png").default).partner__img.partner__img_mini
