@@ -16,7 +16,7 @@ let login = document.querySelector('.js-page_login');
 
 
 let rooms = document.querySelector('.js-page_rooms');
-let newRoom = document.querySelector('.js-card_mini');
+let newRoom = document.querySelector('.js-room_create');
 
 let game = document.querySelector('.js-page_game');
 let gameHeader = document.querySelector('.js-game__header');
@@ -63,6 +63,7 @@ const user = {
     roomName: '',
     priority: 0,
     resources: {},
+    moderator: false,
 };
 
 class ChatContainer {
@@ -524,7 +525,7 @@ socket.on('game:players', (users) => {
                     user.resources = obj.resources;
 
                     console.log(obj.resources)
-                    if (obj.resources.dark) {
+                    if (obj.resources.dark || obj.resources.money) {
                         saleDarkButton.removeAttribute('disabled');
                     } else {
                         saleDarkButton.setAttribute('disabled', 'true')
@@ -628,10 +629,10 @@ function saleDark() {
         let saleDarkForMoney = document.createElement('button');
         saleDarkForMoney.classList.add('button');
         saleDarkForMoney.type = 'button';
-        saleDarkForMoney.textContent = 'Обменять за 50₽';
+        saleDarkForMoney.textContent = '1 СК (Ч) за 50₽';
         saleButtons.push(saleDarkForMoney);
         saleDarkForMoney.addEventListener('click', () => {
-            socket.emit('game:remove-dark', 'money');
+            socket.emit('game:share', { exchange: 'dark', for: 'money' });
             closeSaleList()
         }, { once: true })
 
@@ -641,10 +642,10 @@ function saleDark() {
         let saleDarkForWhite = document.createElement('button');
         saleDarkForWhite.classList.add('button');
         saleDarkForWhite.type = 'button';
-        saleDarkForWhite.textContent = 'Обменять за 5 СК (Б)';
+        saleDarkForWhite.textContent = '1 СК (Ч) за 5 СК (Б)';
         saleButtons.push(saleDarkForWhite);
         saleDarkForWhite.addEventListener('click', () => {
-            socket.emit('game:remove-dark', 'white');
+            socket.emit('game:share', { exchange: 'dark', for: 'white' });
             closeSaleList()
         }, { once: true })
 
@@ -654,10 +655,22 @@ function saleDark() {
         let saleDarkForLives = document.createElement('button');
         saleDarkForLives.classList.add('button');
         saleDarkForLives.type = 'button';
-        saleDarkForLives.textContent = 'Обменять за 5Ж';
+        saleDarkForLives.textContent = '1 СК (Ч) за 5Ж';
         saleButtons.push(saleDarkForLives);
         saleDarkForLives.addEventListener('click', () => {
-            socket.emit('game:remove-dark', 'lives');
+            socket.emit('game:share', { exchange: 'dark', for: 'lives' });
+            closeSaleList()
+        }, { once: true })
+
+    }
+    if (resources.money >= 10) {
+        let saleМоneyForLives = document.createElement('button');
+        saleМоneyForLives.classList.add('button');
+        saleМоneyForLives.type = 'button';
+        saleМоneyForLives.textContent = '10₽ на 1Ж';
+        saleButtons.push(saleМоneyForLives);
+        saleМоneyForLives.addEventListener('click', () => {
+            socket.emit('game:share', { exchange: 'lives', for: 'money' });
             closeSaleList()
         }, { once: true })
 
@@ -665,7 +678,7 @@ function saleDark() {
     if (!saleButtons.length) {
         description.textContent = 'У Вас недостаточно ресурсов';
     } else {
-        description.textContent = 'Вы можете обменять 1 СК (Ч)'
+        description.textContent = 'Вы можете обменять:'
     }
     saleTitle.append(description);
     saleBody.append(...saleButtons);
@@ -995,16 +1008,16 @@ function diceResourses({ white, lives, money }) {
 
 socket.on('game:started', () => {
     isGameStarted = true;
-
-    const modal = new Modal();
-    const content = choiceDreamModal(modal);
-    modal.open(content);
-
-    dreamPaths.forEach(path => {
-        path.classList.add('dream__path_active');
-        path.addEventListener('click', choiceDream)
-    })
-
+    if (!user.moderator) {
+        const modal = new Modal();
+        const content = choiceDreamModal(modal);
+        modal.open(content);
+    
+        dreamPaths.forEach(path => {
+            path.classList.add('dream__path_active');
+            path.addEventListener('click', choiceDream)
+        })
+    }
 })
 
 function choiceDream(e) {
@@ -1095,15 +1108,21 @@ function cutHex(h) { return (h.charAt(0) == "#") ? h.substring(1, 7) : h }
 
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    user.name = e.target.name.value;
     login.classList.add(HIDDEN);
     chatContainer.unhide();
     rooms.classList.remove(HIDDEN);
-    socket.emit('login', { username: user.name })
+    socket.emit('login', { username: e.target.name.value })
 
 })
 
-
+socket.on('login', obj => {
+    user.name = obj.username;
+    console.log(obj);
+    if (obj.moderator) {
+        newRoom.classList.remove(HIDDEN);
+        user.moderator = true;
+    }
+})
 
 
 
