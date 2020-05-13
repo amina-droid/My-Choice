@@ -872,14 +872,19 @@ class OpportunityModal extends Modal {
         this.open([this.title, this.description, this.choice])
     }
 
-    outerAvailable({ white, lives, money }, card) {
-        if ((lives >= 10 && white >= 10) || (lives >= 15 && money >= 100)) {
-            this.successfull(card);
-        } else if (this.checkOuterMove({ white, lives, money })) {
-            this.rollDice({ white, lives, money });
+    outerAvailable({ white, lives, money, dark }, card) {
+        if (!dark) {
+            if ((lives >= 10 && white >= 10) || (lives >= 15 && money >= 100)) {
+                this.successfull(card);
+            } else if (this.checkOuterMove({ white, lives, money })) {
+                this.rollDice({ white, lives, money });
+            } else {
+                this.fail(card);
+            }
         } else {
-            this.fail(card);
+            this.darkFail(card);
         }
+
     }
 
     successfull(card) {
@@ -900,6 +905,15 @@ class OpportunityModal extends Modal {
 
     fail(card) {
         this.description.textContent = 'В следующий раз повезет больше';
+
+        socket.emit('game:choice', {
+            type: card.type,
+            outer: false,
+        })
+    }
+
+    darkFail(card) {
+        this.description.textContent = 'У Вас есть СК (Ч), Вы не можете перейти на внешний круг';
 
         socket.emit('game:choice', {
             type: card.type,
