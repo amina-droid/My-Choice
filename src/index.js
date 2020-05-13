@@ -590,6 +590,8 @@ socket.on('game:players', (users) => {
 
 saleDarkButton.addEventListener('click', saleDark)
 
+
+
 socket.on('game:error', () => {
     const modal = new Modal();
     const content = gameError(modal);
@@ -608,7 +610,7 @@ function gameError(modal) {
 
     buttonOk.addEventListener('click', () => {
         modal.close();
-        leaveRoom();
+        window.location.reload();
     })
     return [description, buttonOk]
 }
