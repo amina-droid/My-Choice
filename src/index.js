@@ -1134,8 +1134,9 @@ loginForm.addEventListener('submit', (e) => {
 socket.on('login', obj => {
     user.name = obj.username;
     console.log(obj);
+    newRoom.classList.remove(HIDDEN);
     if (obj.moderator) {
-        newRoom.classList.remove(HIDDEN);
+        
         user.moderator = true;
     }
 })
